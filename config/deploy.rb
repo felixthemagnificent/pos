@@ -2,7 +2,7 @@
 lock "3.8.0"
 
 set :application, "pos"
-set :repo_url, "ssh://git@bitbucket.org/felix_yasnopolski/pos.git"
+set :repo_url, "ssh://git@github.com:felixthemagnificent/pos.git"
 
 # Default branch is :master
 # ask :branch, `git rev-parse --abbrev-ref HEAD`.chomp

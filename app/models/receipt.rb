@@ -21,7 +21,7 @@ class Receipt < ApplicationRecord
     company = self.user.company_name
     sell_count = Receipt.all.count
     cur_date_time = DateTime.now.strftime('%d/%m/%Y %H:%M')
-    strings << company.center(lineSize, " ")
+    strings << company.center(lineSize, " ") if company
     strings << "Продажа №" + sell_count.to_s
     strings << cur_date_time.rjust(lineSize)
     strings << '-'*lineSize

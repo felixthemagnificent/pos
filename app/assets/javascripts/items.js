@@ -18,6 +18,16 @@ var itemsReady = function() {
           dataType: "json",
           transport: {
               read: "/items.json",
+              create: {
+                url: "/items.json",
+                type: "POST"
+              },
+              update: {
+                url: function (item) {
+                  return "/items/" + item.id;
+                },
+                type: "PATCH"
+              },
               destroy: {
                 url: function (item) {
                   return "/items/" + item.id;
@@ -30,10 +40,11 @@ var itemsReady = function() {
                   id: "id",
                   fields: {
                       name: { type: "string" },
-                      in_stock: { type: "number" },
+                      in_stock: { type: "number", editable: false },
                       price: { type: "number" },
                       updated_at: {
                           type: "datetime",
+                          editable: false,
                           parse: function(date) {
                               return kendo.parseDate(date)
                           },
@@ -48,6 +59,7 @@ var itemsReady = function() {
           serverSorting: true
       },
       height: 550,
+      toolbar: [{ name: "create", text: "Добавить" }],
       filterable: {
           extra: false,
           messages: {
@@ -81,20 +93,29 @@ var itemsReady = function() {
           },
           {
               title: "Количество на складе",
-              field: "in_stock"
+              field: "in_stock",
+              editable: false,
+              width: '15%'
           },
           {
               field: "price",
-              title: "Цена"
+              title: "Цена",
+              width: '15%'
           },
           {
               field: "updated_at",
               title: "Последнее обновление",
               format: "{0:dd/MM/yyyy HH:MM}",
-              filterable: false
+              filterable: false,
+              editable: false,
+              width: '13%'
           },
           {
             command: [
+            {
+              text: "Изменить",
+              name: "edit",
+            },
             {
               text: "Партии",
               click: function (e) {
@@ -115,7 +136,8 @@ var itemsReady = function() {
               text: "Удалить",
               name: "destroy",
             },
-            ]
+            ],
+            width: '24%'
           }
       ]
   });

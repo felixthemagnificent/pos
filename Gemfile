@@ -24,6 +24,8 @@ gem 'high_voltage'
 gem 'mysql2', '~> 0.3.18'
 gem 'simple_form'
 gem 'sidekiq'
+gem 'unicorn'
+
 group :development do
   gem 'better_errors'
   gem 'binding_of_caller'

@@ -84,7 +84,10 @@ var itemsReady = function() {
           }
       },
       sortable: true,
-      editable: "inline",
+      editable: {
+        mode: "inline",
+        confirmation:  "Вы правда хотите удалить продукт?"
+      },
       pageable: true,
       columns: [
           {
@@ -113,7 +116,11 @@ var itemsReady = function() {
           {
             command: [
             {
-              text: "Изменить",
+              text: { // sets the text of the "Edit", "Update" and "Cancel" buttons
+                    edit: "Изменить",
+                    update: "Сохранить",
+                    cancel: "Отмена"
+                },
               name: "edit",
             },
             {

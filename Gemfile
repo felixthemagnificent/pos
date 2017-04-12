@@ -30,6 +30,12 @@ group :development do
   gem 'rails_layout'
   gem 'spring-commands-rspec'
   gem 'capistrano'
+  gem 'capistrano-rvm'
+  gem 'capistrano-rbenv'
+  gem 'capistrano-unicorn-nginx'
+  gem 'capistrano-rails'
+  gem 'capistrano-bundler'
+  gem 'capistrano-rails-console'
 end
 group :development, :test do
   gem 'factory_girl_rails'

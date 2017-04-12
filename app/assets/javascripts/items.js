@@ -30,7 +30,7 @@ var itemsReady = function() {
               },
               destroy: {
                 url: function (item) {
-                  return "/items/" + item.id;
+                  return "/items/" + item.id + ".json";
                 },
                 type: "DELETE"
               },
@@ -126,8 +126,8 @@ var itemsReady = function() {
                   success: function (data) {
                     myWindow.content(data);
                     myWindow.center().open();
-                    reloadGrid(item);
                     myWindow.center();
+                    reloadGrid(item);
                   }
                 });
               }

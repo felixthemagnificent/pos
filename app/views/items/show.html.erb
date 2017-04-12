@@ -1,0 +1,82 @@
+<div id="item_barcodes_grid"></div>
+<script type="text/javascript">
+  function reloadGrid(item) {
+    $('#item_barcodes_grid').kendoGrid({
+      dataSource: {
+        transport: {
+          read:  {
+            url: "/items/" + item.id + "/barcodes/",
+          },
+          update: {
+            url: function (barcode) {
+                return "/items/" + item.id + "/barcodes/" + barcode.id + ".json";
+              },
+            type: "PATCH"
+          },
+          destroy: {
+            url: function (barcode) {
+              return "/items/" + item.id + "/barcodes/" + barcode.id + ".json";
+            },
+            type: "DELETE"
+          },
+          create: {
+            url: "/items/" + item.id + "/barcodes",
+            type: "POST"
+          },
+
+        },
+        schema: {
+            model: {
+                id: "id",
+                fields: {
+                    code: { type: "string" },
+                    count: { type: "integer", validation: { min: 0, required: true }  },
+                    updated_at: {
+                      editable: false,
+                      type: "datetime",
+                      parse: function(date) {
+                             return kendo.parseDate(date)
+                        },
+                    },
+                }
+            }
+        }
+      },
+      height: 400,
+      filterable: false,
+      sortable: true,
+      editable: "inline",
+      pageable: true,
+      toolbar: [{ name: "create", text: "Добавить" }],
+      columns: [
+          {
+              field: "code",
+              title: "Штрих-код",
+          },
+          {
+              title: "Количество",
+              field: "count",
+              width: '15%'
+          },
+          {
+              field: "updated_at",
+              title: "Последнее обновление",
+              format: "{0:dd/MM/yyyy HH:MM}",
+              width: '24%'
+          },
+          {
+            command: [
+            {
+              text: "Изменить",
+              name: 'edit'
+            },
+            {
+              text: "Удалить",
+              name: "destroy",
+            },
+            ]
+          }
+        ]
+      });
+  }
+</script>

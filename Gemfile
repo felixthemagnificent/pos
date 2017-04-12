@@ -23,10 +23,13 @@ gem 'devise'
 gem 'high_voltage'
 gem 'mysql2', '~> 0.3.18'
 gem 'simple_form'
+gem 'sidekiq'
 group :development do
   gem 'better_errors'
+  gem 'binding_of_caller'
   gem 'rails_layout'
   gem 'spring-commands-rspec'
+  gem 'capistrano'
 end
 group :development, :test do
   gem 'factory_girl_rails'

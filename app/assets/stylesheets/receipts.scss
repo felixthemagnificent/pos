@@ -1,0 +1,38 @@
+// Place all the styles related to the receipts controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+#wrapper {
+  margin: 0 auto;
+}
+
+#wrapper > #receipts_grid {
+  float: left;
+  width: 80%;
+}
+
+#wrapper > #cash_op {
+  float: left;
+  width: 19%
+}
+
+#wrapper > #cash_op > h1 {
+  text-align: right
+}
+
+#wrapper > .errors_label {
+  background: red;
+  color: white;
+  text-align: center;
+}
+
+.receipt_buttons_left, .receipt_buttons_right {
+   min-height: 100px;
+   width: 100%;
+}
+
+.receipt_buttons_left > button, .receipt_buttons_right > button {
+  margin-top: 10px;
+  min-height: inherit !important;
+  width: 45%;
+}

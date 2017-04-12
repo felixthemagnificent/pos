@@ -4,17 +4,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= content_for?(:title) ? yield(:title) : "Pos" %></title>
     <meta name="description" content="<%= content_for?(:description) ? yield(:description) : "Pos" %>">
+    <%= stylesheet_link_tag 'kendo.common-bootstrap.min', media: 'all' %>
+    <%= stylesheet_link_tag 'kendo.bootstrap.mobile.min', media: 'all' %>
+    <%= stylesheet_link_tag 'kendo.bootstrap.min.css', media: 'all' %>
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track' => 'reload' %>
     <%= javascript_include_tag 'application', 'data-turbolinks-track' => 'reload' %>
+    <%= javascript_include_tag 'kendo.all.min' %>
     <%= csrf_meta_tags %>
   </head>
   <body>
     <header>
       <%= render 'layouts/navigation' %>
     </header>
-    <main role="main">
-       <%= render 'layouts/messages' %>
-       <%= yield %>
-    </main>
+    <div class="container-fluid" style="padding-top: 20px" >
+      <%= render 'layouts/messages' %>
+
+      <%= yield %>
+
+    </div>
   </body>
 </html>

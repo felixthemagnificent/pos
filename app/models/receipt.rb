@@ -29,16 +29,16 @@ class Receipt < ApplicationRecord
       product_name = item.name
       product_price = item.price
       if product_name.length + 1 + product_price.to_s.length <= lineSize
-        strings << product_name + " "*(lineSize - product_name.length - product_price.to_s.length + 1) + product_price.to_s
+        strings << product_name.ljust(lineSize - product_price.to_s.length) + product_price.to_s
       else
         strings << product_name
         strings << product_price
       end
     end
     strings << '*'*lineSize
-    strings << "Итого:" + " "*(lineSize - 6 - total.to_s.length) + total.to_s
-    strings << "Оплачено:" + " "*(lineSize - 11 - paid.to_s.length) + paid.to_s
-    strings << "Сдача:" + " "*(lineSize - 6 - (total-paid).to_s.length) + (total-paid).to_s
+    strings << "Итого:".ljust(lineSize - total.to_s.length) + total.to_s
+    strings << "Оплачено:".ljust(lineSize - paid.to_s.length) + paid.to_s
+    strings << "Сдача:".ljust(lineSize - (total-paid).to_s.length)) + (total-paid).to_s
     strings << '*'*lineSize
     strings << 'Спасибо за покупку!'
     strings.join("\n")

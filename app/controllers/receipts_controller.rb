@@ -30,7 +30,7 @@ class ReceiptsController < ApplicationController
       receipt.save!
       data = receipt.getCheque
     end
-    render json: {cheque: Base64.encode64(data)}, status: status
+    render json: {cheque: data}, status: status
   end
 
   # GET /receipts

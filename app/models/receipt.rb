@@ -23,8 +23,8 @@ class Receipt < ApplicationRecord
     cur_date_time = DateTime.now.strftime('%d/%m/%Y %H:%M')
     strings << company.center(lineSize, " ") if company
     strings << "Продажа №" + sell_count.to_s
-    strings << cur_date_time.rjust(lineSize)
-    strings << '-'*lineSize
+    strings << cur_date_time
+    strings << '='*lineSize
     self.items.each do |item|
       product_name = item.name
       product_price = item.price
@@ -35,9 +35,9 @@ class Receipt < ApplicationRecord
         strings << product_price
       end
     end
-    strings << '-'*lineSize
+    strings << '='*lineSize
     strings << "Итого:" + " "*(lineSize - 6 - total.to_s.length) + total.to_s
-    strings << "Оплачено:" + " "*(lineSize - 9 - paid.to_s.length) + paid.to_s
+    strings << "Оплачено:" + " "*(lineSize - 11 - paid.to_s.length) + paid.to_s
     strings << "Сдача:" + " "*(lineSize - 6 - (total-paid).to_s.length) + (total-paid).to_s
     strings << '-'*lineSize
     strings << 'Спасибо за покупку!'.center(lineSize, " ")

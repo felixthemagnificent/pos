@@ -38,7 +38,7 @@ class Receipt < ApplicationRecord
     strings << '*'*lineSize
     strings << "Итого:".ljust(lineSize - total.to_s.length) + total.to_s
     strings << "Оплачено:".ljust(lineSize - paid.to_s.length) + paid.to_s
-    strings << "Сдача:".ljust(lineSize - (total-paid).to_s.length)) + (total-paid).to_s
+    strings << "Сдача:".ljust(lineSize - (total-paid).to_s.length) + (total-paid).to_s
     strings << '*'*lineSize
     strings << 'Спасибо за покупку!'
     strings.join("\n")

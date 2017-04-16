@@ -16,7 +16,7 @@ class Receipt < ApplicationRecord
   end
 
   def getCheque
-    lineSize = 30
+    lineSize = 26
     strings = []
     company = self.user.company_name
     sell_count = Receipt.all.count

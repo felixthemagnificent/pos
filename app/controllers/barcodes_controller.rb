@@ -30,8 +30,11 @@ class BarcodesController < ApplicationController
   # PATCH/PUT /items/1
   # PATCH/PUT /items/1.json
   def update
+    @barcode.code = params[:code]
+    @barcode.count = params[:count]
+    @barcode.item = Item.find(params[:item_id])
     respond_to do |format|
-      if @barcode.update(barcode_params)
+      if @barcode.save
         format.json { render json: @barcode, status: :ok }
       else
         format.json { render json: @barcode.errors, status: :unprocessable_entity }

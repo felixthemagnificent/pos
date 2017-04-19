@@ -11,10 +11,14 @@ class ReceiptsController < ApplicationController
       items.each_pair do |_,item|
         barcode = item[:Barcode]
         barcode_item = Barcode.for_user(current_user).find_by_code(barcode)
-        if barcode_item
+        if barcode_item && barcode.in_stock
           barcode_item.count -= 1
           barcode_item.save!
           receipt.items << barcode_item.item
+        elsif barcode_item && barcode_item.count <= 0
+          status = :unprocessable_entity
+          data = {reason: 'invalid_barcode', value: barcode}
+          raise ActiveRecord::Rollback
         else
           status = :unprocessable_entity
           data = {reason: 'invalid_barcode', value: barcode}
@@ -42,6 +46,12 @@ class ReceiptsController < ApplicationController
   # GET /receipts/1
   # GET /receipts/1.json
   def show
+    respond_to do |format|
+      format.html { render layout: false }
+      format.json do
+        render json: @receipt.items.map { |e| { name: e.name, price: e.price} }
+      end
+    end
   end
 
   # GET /receipts/new

@@ -2,8 +2,9 @@ class Receipt < ApplicationRecord
   has_many :receipts_items
   has_many :items, through: :receipts_items
   belongs_to :user
-
+  scope :for_user, ->(user) { where(user: user) }
   scope :today, -> { where(created_at: DateTime.now.beginning_of_day..DateTime.now.end_of_day) }
+
 
   def total
     total_sum = 0

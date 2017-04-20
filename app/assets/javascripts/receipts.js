@@ -30,6 +30,11 @@ function clearGridAndInputs() {
   $('#user_interaction').val('');
   totalPaid = 0;
   $('.errors_label').addClass('hidden');
+  $('#receive_money_button').prop('disabled', true);
+  $('#close_cheque_button').prop('disabled', true);
+  $('#delete_button').prop('disabled', true);
+  $('#return_button').prop('disabled', false);
+
 }
 
 function recalculateReturn()
@@ -61,6 +66,10 @@ function addDataToGrid(data) {
     Price: data.price,
     Barcode: data.code
   });
+  $('#receive_money_button').prop('disabled', false);
+  $('#close_cheque_button').prop('disabled', false);
+  $('#delete_button').prop('disabled', false);
+  $('#return_button').prop('disabled', true);
   recalculatePrice();
   buyMode = true;
 }
@@ -86,9 +95,11 @@ function removeFromGridByBarcode(barcode) {
       break;
     }
   }
+  items = grid.dataItems();
   if (items.length == 0)
   {
     buyMode = false;
+    clearGridAndInputs();
   }
 }
 
@@ -282,6 +293,7 @@ var docReady = function() {
   startWatch();
   handleTextInput();
   handleButtons();
+  clearGridAndInputs();
 };
 
 $(docReady);

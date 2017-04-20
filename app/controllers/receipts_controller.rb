@@ -11,11 +11,11 @@ class ReceiptsController < ApplicationController
       items.each_pair do |_,item|
         barcode = item[:Barcode]
         barcode_item = Barcode.for_user(current_user).find_by_code(barcode)
-        if barcode_item && barcode.in_stock
+        if barcode_item && barcode_item.in_stock
           barcode_item.count -= 1
           barcode_item.save!
           receipt.items << barcode_item.item
-        elsif barcode_item && barcode_item.count <= 0
+        elsif barcode_item && !barcode_item.in_stock
           status = :unprocessable_entity
           data = {reason: 'invalid_barcode', value: barcode}
           raise ActiveRecord::Rollback

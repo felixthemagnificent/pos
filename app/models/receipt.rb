@@ -1,10 +1,10 @@
 class Receipt < ApplicationRecord
-  has_many :receipts_items
-  has_many :items, through: :receipts_items
+  has_many :positions, dependent: :destroy
+  has_many :items, through: :positions
   belongs_to :user
   scope :for_user, ->(user) { where(user: user) }
   scope :today, -> { where(created_at: DateTime.now.beginning_of_day..DateTime.now.end_of_day) }
-
+  enum status: [:opened, :closed]
 
   def total
     total_sum = 0
@@ -14,6 +14,10 @@ class Receipt < ApplicationRecord
 
   def self.today_total
     Receipt.today.map(&:total).inject(&:+) || 0
+  end
+
+  def self.last_opened
+    where(status: :opened).last
   end
 
   def getCheque

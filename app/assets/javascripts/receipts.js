@@ -2,6 +2,7 @@ var totalPaid = 0;
 var isModalOpen = false;
 var returnMode = false;
 var buyMode = false;
+var documentLoaded = false;
 var ENTER_KEY = 13;
 var PLUS_KEY = 187;
 var MULTIPLY_KEY = 56;
@@ -23,17 +24,20 @@ function getGrid()
 }
 function clearGridAndInputs() {
   var grid = $('#receipts_grid').data('kendoGrid');
-  grid.dataSource.cancelChanges();
-  $('#total_sum').html('0');
-  $('#total_paid').html('0');
-  $('#total_return').html('0');
-  $('#user_interaction').val('');
-  totalPaid = 0;
-  $('.errors_label').addClass('hidden');
-  $('#receive_money_button').prop('disabled', true);
-  $('#close_cheque_button').prop('disabled', true);
-  $('#delete_button').prop('disabled', true);
-  $('#return_button').prop('disabled', false);
+  if (grid)
+  {
+    grid.dataSource.cancelChanges();
+    $('#total_sum').html('0');
+    $('#total_paid').html('0');
+    $('#total_return').html('0');
+    $('#user_interaction').val('');
+    totalPaid = 0;
+    $('.errors_label').addClass('hidden');
+    $('#receive_money_button').prop('disabled', true);
+    $('#close_cheque_button').prop('disabled', true);
+    $('#delete_button').prop('disabled', true);
+    $('#return_button').prop('disabled', false);
+  }
 
 }
 
@@ -81,13 +85,20 @@ function addToGridByBarcode(barcode) {
       barcode: barcode
     },
     success: addDataToGrid,
-    error: notExistentProduct
+    error: addDataErrors
   });
 }
 
 function removeFromGridByBarcode(barcode) {
   var grid = getGrid();
   var items = grid.dataItems();
+  $.get({
+    url: '/items/search',
+    data: {
+      barcode: barcode,
+      delete: true
+    }
+  });
   for (var i = items.length - 1; i >= 0; i--) {
     if (items[i].Barcode == barcode)
     {
@@ -121,9 +132,13 @@ function requestMoreMoney(amount) {
   $('.errors_label').html('НЕОБХОДИМО ДОПЛАТИТЬ ' + amount);
 }
 
-function notExistentProduct() {
+function addDataErrors(data) {
   $('.errors_label').removeClass('hidden');
-  $('.errors_label').html('ЭТОГО ПРОДУКТА В БАЗЕ НЕТ');
+  if (data.error == 'insufficient_amount') {
+    $('.errors_label').html('ПРОДУКТ КОНЧИЛСЯ');
+  } else {
+    $('.errors_label').html('ЭТОГО ПРОДУКТА В БАЗЕ НЕТ');
+  }
 }
 
 function setReturnProductsMode() {
@@ -150,11 +165,11 @@ function closeReceipt()
         paid: totalPaid
       },
       success: function(data) {
+        clearGridAndInputs();
         $.post({
           url: 'http://localhost:8332/printcheque',
           data: data
         });
-        clearGridAndInputs();
         buyMode = false;
       },
       error: function (data) {
@@ -215,23 +230,23 @@ function closeCheque() {
 
 function handleButtons()
 {
-  $('#delete_button').on('click',function() {
+  $('#delete_button').unbind('click').on('click',function() {
     $('#user_interaction').text('-');
   });
-  $('#receive_money_button').on('click',function() {
+  $('#receive_money_button').unbind('click').on('click',function() {
       receiveMoney();
   });
-  $('#return_button').on('click',function() {
+  $('#return_button').unbind('click').on('click',function() {
     setReturnProductsMode();
   });
-  $('#close_cheque_button').on('click',function() {
+  $('#close_cheque_button').unbind('click').on('click',function() {
     closeCheque();
   });
 }
 function handleTextInput()
 {
   // body...
-  $('#user_interaction').keyup(function(e) {
+  $('#user_interaction').unbind('keyup').keyup(function(e) {
 
     if(e.which == ENTER_KEY) {
       hideError();
@@ -264,6 +279,9 @@ function handleTextInput()
 function initGrid() {
   $('#receipts_grid').kendoGrid({
     dataSource: {
+      transport: {
+        read: "/receipts/last_opened"
+      },
       schema: {
         model: {
           fields: {
@@ -274,6 +292,7 @@ function initGrid() {
         }
       }
     },
+    dataBound: recalculatePrice,
     height: 600,
     columns: [{
       field: "ItemName",
@@ -295,6 +314,5 @@ var docReady = function() {
   handleButtons();
   clearGridAndInputs();
 };
-
 $(docReady);
-$( document ).on('turbolinks:load',docReady);
+$(document).on('turbolinks:load',docReady);

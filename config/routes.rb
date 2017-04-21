@@ -11,7 +11,11 @@ Rails.application.routes.draw do
   get '/items/search', to: 'items#search'
   get '/items/barcode', to: 'items#barcode'
   post '/receipts/close', to: 'receipts#close_receipt'
-  resources :receipts
+  resources :receipts do
+    collection do
+      get 'last_opened', to: 'receipts#last_opened'
+    end
+  end
   resources :items do
     resources :barcodes
   end

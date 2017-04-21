@@ -1,6 +1,6 @@
 class Item < ApplicationRecord
-  has_many :receipts_items
-  has_many :receipts, through: :receipts_items
+  has_many :positions
+  has_many :receipts, through: :positions
   has_many :barcodes, dependent: :destroy
   belongs_to :user
   scope :for_user, ->(user) { where(user: user) }

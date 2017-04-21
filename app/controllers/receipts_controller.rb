@@ -5,36 +5,48 @@ class ReceiptsController < ApplicationController
     data = {}
     status = :ok
     Receipt.transaction do
-      receipt = Receipt.new
-      receipt.user = current_user
-      items = params['items']
-      items.each_pair do |_,item|
-        barcode = item[:Barcode]
-        barcode_item = Barcode.for_user(current_user).find_by_code(barcode)
-        if barcode_item && barcode_item.in_stock
-          barcode_item.count -= 1
-          barcode_item.save!
-          receipt.items << barcode_item.item
-        elsif barcode_item && !barcode_item.in_stock
+      receipt = Receipt.for_user(current_user).last_opened
+      if receipt.positions.count
+        receipt.closed!
+        items = params['items']
+        items.each_pair do |_,item|
+          barcode = item[:Barcode]
+          barcode_item = Barcode.for_user(current_user).find_by_code(barcode) # TODO rewrite with stock_item
+          if barcode_item
+            barcode_item.locked_amount = 0
+            barcode_item.save!
+          else
+            status = :unprocessable_entity
+            data = {reason: 'invalid_barcode', value: barcode}
+            raise ActiveRecord::Rollback
+          end
+        end
+        receipt.paid = params['paid']
+        if receipt.paid < receipt.total
           status = :unprocessable_entity
-          data = {reason: 'invalid_barcode', value: barcode}
-          raise ActiveRecord::Rollback
-        else
-          status = :unprocessable_entity
-          data = {reason: 'invalid_barcode', value: barcode}
+          data = {reason: 'not_enough_paid', value:(receipt.total - receipt.paid) }
           raise ActiveRecord::Rollback
         end
-      end
-      receipt.paid = params['paid']
-      if receipt.paid < receipt.total
-        status = :unprocessable_entity
-        data = {reason: 'not_enough_paid', value:(receipt.total - receipt.paid) }
+
+        receipt.save!
+        Receipt.create!(user: current_user, status: :opened)
+        data = receipt.getCheque
+      else
         raise ActiveRecord::Rollback
       end
-      receipt.save!
-      data = receipt.getCheque
     end
     render json: {cheque: data}, status: status
+  end
+
+  def last_opened
+    positions = Receipt.for_user(User.first).last_opened.positions.map do |position|
+        {
+          ItemName: position.item.name,
+          Price: position.item.price,
+          Barcode: position.barcode.code
+        }
+      end
+    render json: positions
   end
 
   # GET /receipts
@@ -49,13 +61,14 @@ class ReceiptsController < ApplicationController
     respond_to do |format|
       format.html { render layout: false }
       format.json do
-        render json: @receipt.items.map { |e| { name: e.name, price: e.price} }
+        render json: @receipt.positions.map { |e| { name: e.item.name, price: e.item.price} }
       end
     end
   end
 
   # GET /receipts/new
   def new
+    Receipt.create!(user: current_user, status: :opened) unless Receipt.for_user(current_user).last_opened
   end
 
   # GET /receipts/1/edit

@@ -15,8 +15,33 @@ class ItemsController < ApplicationController
   end
 
   def search
+    delete = params.key? 'delete'
     if @item
-      render json: @item.slice(:name, :price).merge({code: @barcode.code})
+      if delete
+        @barcode.transaction do
+          if @barcode.locked_amount > 0
+            @barcode.count += 1
+            @barcode.locked_amount -= 1
+            @barcode.save!
+            Receipt.for_user(current_user).last_opened.positions.delete Position.where(barcode: @barcode, item: @item)
+
+          end
+        end
+        render json: nil, status: :ok
+      else
+        # render json: @item.slice(:name, :price).merge({code: @barcode.code})
+        if @barcode.count > 0
+          @barcode.transaction do
+            @barcode.count -= 1
+            @barcode.locked_amount += 1
+            @barcode.save!
+            Receipt.for_user(current_user).last_opened.positions << Position.create(barcode: @barcode, item: @item)
+          end
+          render json: @item.slice(:name, :price).merge({code: @barcode.code})
+        else
+          render json: { error: 'insufficient_amount' }, status: :unprocessable_entity
+        end
+      end
     else
       render json: nil, status: :unprocessable_entity
     end

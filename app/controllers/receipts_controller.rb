@@ -8,19 +8,22 @@ class ReceiptsController < ApplicationController
       receipt = Receipt.for_user(current_user).last_opened
       if receipt.positions.count
         receipt.closed!
-        items = params['items']
-        items.each_pair do |_,item|
-          barcode = item[:Barcode]
-          barcode_item = Barcode.for_user(current_user).find_by_code(barcode) # TODO rewrite with stock_item
-          if barcode_item
-            barcode_item.locked_amount = 0
-            barcode_item.save!
-          else
-            status = :unprocessable_entity
-            data = {reason: 'invalid_barcode', value: barcode}
-            raise ActiveRecord::Rollback
-          end
+        receipt.positions.each do |position|
+          position.barcode.locked_amount = 0
+          position.barcode.save!
         end
+        # items.each_pair do |_,item|
+        #   barcode = item[:Barcode]
+        #   barcode_item = Barcode.for_user(current_user).find_by_code(barcode) # TODO rewrite with stock_item
+        #   if barcode_item
+        #     barcode_item.locked_amount = 0
+        #     barcode_item.save!
+        #   else
+        #     status = :unprocessable_entity
+        #     data = {reason: 'invalid_barcode', value: barcode}
+        #     raise ActiveRecord::Rollback
+        #   end
+        # end
         receipt.paid = params['paid']
         if receipt.paid < receipt.total
           status = :unprocessable_entity

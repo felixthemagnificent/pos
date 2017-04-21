@@ -22,23 +22,25 @@ function getGrid()
 {
   return $('#receipts_grid').data('kendoGrid');
 }
+function updateButtons() {
+  returnMode = !buyMode;
+  $('#receive_money_button').prop('disabled', !buyMode);
+  $('#close_cheque_button').prop('disabled', !buyMode);
+  $('#delete_button').prop('disabled', !buyMode);
+  $('#return_button').prop('disabled', buyMode);
+}
 function clearGridAndInputs() {
-  var grid = $('#receipts_grid').data('kendoGrid');
-  if (grid)
+  if (getGrid())
   {
-    grid.dataSource.cancelChanges();
+    getGrid().dataSource.read();
     $('#total_sum').html('0');
     $('#total_paid').html('0');
     $('#total_return').html('0');
     $('#user_interaction').val('');
     totalPaid = 0;
     $('.errors_label').addClass('hidden');
-    $('#receive_money_button').prop('disabled', true);
-    $('#close_cheque_button').prop('disabled', true);
-    $('#delete_button').prop('disabled', true);
-    $('#return_button').prop('disabled', false);
+    updateButtons();
   }
-
 }
 
 function recalculateReturn()
@@ -60,6 +62,11 @@ function recalculatePrice() {
   $(grid.dataItems()).each(function () {
     totalPrice += this.Price;
   });
+  if (totalPrice)
+  {
+    buyMode = true;
+    updateButtons();
+  }
   $('#total_sum').html(totalPrice);
 }
 
@@ -231,7 +238,7 @@ function closeCheque() {
 function handleButtons()
 {
   $('#delete_button').unbind('click').on('click',function() {
-    $('#user_interaction').text('-');
+    $('#user_interaction').val('-');
   });
   $('#receive_money_button').unbind('click').on('click',function() {
       receiveMoney();

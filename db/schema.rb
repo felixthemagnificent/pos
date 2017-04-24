@@ -10,22 +10,32 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170421071354) do
+ActiveRecord::Schema.define(version: 20170422192615) do
 
   create_table "barcodes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string   "code"
     t.integer  "item_id"
-    t.datetime "created_at",                null: false
-    t.datetime "updated_at",                null: false
-    t.integer  "count"
-    t.integer  "locked_amount", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["item_id"], name: "index_barcodes_on_item_id", using: :btree
   end
 
-  create_table "items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string   "sku",                     collation: "utf8mb4_general_ci"
-    t.string   "name",                    collation: "utf8mb4_general_ci"
+  create_table "batches", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer  "item_id"
+    t.integer  "user_id"
+    t.integer  "count"
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
     t.integer  "price"
+    t.integer  "locked_amount", default: 0
+    t.integer  "barcode_id"
+    t.index ["barcode_id"], name: "index_batches_on_barcode_id", using: :btree
+    t.index ["item_id"], name: "index_batches_on_item_id", using: :btree
+    t.index ["user_id"], name: "index_batches_on_user_id", using: :btree
+  end
+
+  create_table "items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string   "name",                    collation: "utf8mb4_general_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer  "user_id"
@@ -34,12 +44,14 @@ ActiveRecord::Schema.define(version: 20170421071354) do
   end
 
   create_table "positions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer  "barcode_id"
     t.integer  "item_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
     t.integer  "receipt_id"
-    t.index ["barcode_id"], name: "index_positions_on_barcode_id", using: :btree
+    t.integer  "count",      default: 0
+    t.integer  "batch_id"
+    t.integer  "price"
+    t.index ["batch_id"], name: "index_positions_on_batch_id", using: :btree
     t.index ["item_id"], name: "index_positions_on_item_id", using: :btree
     t.index ["receipt_id"], name: "index_positions_on_receipt_id", using: :btree
   end
@@ -52,6 +64,15 @@ ActiveRecord::Schema.define(version: 20170421071354) do
     t.integer  "user_id"
     t.integer  "status"
     t.index ["user_id"], name: "index_receipts_on_user_id", using: :btree
+  end
+
+  create_table "roles", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string   "name",                      null: false
+    t.string   "title",                     null: false
+    t.text     "description", limit: 65535, null: false
+    t.text     "the_role",    limit: 65535, null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
@@ -69,13 +90,17 @@ ActiveRecord::Schema.define(version: 20170421071354) do
     t.datetime "updated_at",                          null: false
     t.string   "name"
     t.string   "company_name"
+    t.integer  "role_id"
     t.index ["email"], name: "index_users_on_email", unique: true, using: :btree
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
   end
 
   add_foreign_key "barcodes", "items"
+  add_foreign_key "batches", "barcodes"
+  add_foreign_key "batches", "items"
+  add_foreign_key "batches", "users"
   add_foreign_key "items", "users"
-  add_foreign_key "positions", "barcodes"
+  add_foreign_key "positions", "batches"
   add_foreign_key "positions", "items"
   add_foreign_key "positions", "receipts"
   add_foreign_key "receipts", "users"

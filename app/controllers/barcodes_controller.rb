@@ -4,7 +4,7 @@ class BarcodesController < ApplicationController
   # GET /items
   # GET /items.json
   def index
-    @barcode = Barcode.for_user(current_user).where(item_id: params[:item_id])
+    @barcode = Barcode.where(item_id: params[:item_id])
     render json: @barcode
   end
 
@@ -16,7 +16,6 @@ class BarcodesController < ApplicationController
   def create
     @barcode = Barcode.new
     @barcode.code = params[:code]
-    @barcode.count = params[:count]
     @barcode.item = Item.find(params[:item_id])
     respond_to do |format|
       if @barcode.save
@@ -31,7 +30,6 @@ class BarcodesController < ApplicationController
   # PATCH/PUT /items/1.json
   def update
     @barcode.code = params[:code]
-    @barcode.count = params[:count]
     @barcode.item = Item.find(params[:item_id])
     respond_to do |format|
       if @barcode.save

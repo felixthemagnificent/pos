@@ -22,6 +22,10 @@ function getGrid()
 {
   return $('#receipts_grid').data('kendoGrid');
 }
+function updateGrid()
+{
+  getGrid().dataSource.read();
+}
 function updateButtons() {
   returnMode = !buyMode;
   $('#receive_money_button').prop('disabled', !buyMode);
@@ -60,7 +64,7 @@ function recalculatePrice() {
   var grid = $('#receipts_grid').data('kendoGrid');
   var totalPrice = 0;
   $(grid.dataItems()).each(function () {
-    totalPrice += this.Price;
+    totalPrice += this.Price * this.Amount;
   });
   if (totalPrice)
   {
@@ -69,14 +73,31 @@ function recalculatePrice() {
   }
   $('#total_sum').html(totalPrice);
 }
-
+function findBarcodeInGrid(barcode) {
+  var items = getGrid().dataItems();
+  for (var i = items.length - 1; i >= 0; i--) {
+    if (items[i].Barcode == barcode)
+    {
+      return items[i];
+    }
+  }
+  return false;
+}
 function addDataToGrid(data) {
   var grid = getGrid();
-  grid.dataSource.add({
-    ItemName: data.name,
-    Price: data.price,
-    Barcode: data.code
-  });
+  var item = findBarcodeInGrid(data.code)
+  // if (item)
+  // {
+  //   item.Quantity++;
+  // } else {
+  //   grid.dataSource.add({
+  //     ItemName: data.name,
+  //     Price: data.price,
+  //     Barcode: data.code,
+  //     Quantity: 1
+  //   });
+  // }
+  updateGrid();
   $('#receive_money_button').prop('disabled', false);
   $('#close_cheque_button').prop('disabled', false);
   $('#delete_button').prop('disabled', false);
@@ -87,7 +108,7 @@ function addDataToGrid(data) {
 
 function addToGridByBarcode(barcode) {
   $.get({
-    url: '/items/search',
+    url: '/items/process_cheque',
     data: {
       barcode: barcode
     },
@@ -100,25 +121,28 @@ function removeFromGridByBarcode(barcode) {
   var grid = getGrid();
   var items = grid.dataItems();
   $.get({
-    url: '/items/search',
+    url: '/items/process_cheque',
     data: {
       barcode: barcode,
       delete: true
+    },
+    success: function() {
+      updateGrid();
+      items = grid.dataItems();
+      if (items.length == 0)
+      {
+        buyMode = false;
+        clearGridAndInputs();
+      }
     }
   });
-  for (var i = items.length - 1; i >= 0; i--) {
-    if (items[i].Barcode == barcode)
-    {
-      grid.dataSource.remove(items[i]);
-      break;
-    }
-  }
-  items = grid.dataItems();
-  if (items.length == 0)
-  {
-    buyMode = false;
-    clearGridAndInputs();
-  }
+  // for (var i = items.length - 1; i >= 0; i--) {
+  //   if (items[i].Barcode == barcode)
+  //   {
+  //     grid.dataSource.remove(items[i]);
+  //     break;
+  //   }
+  // }
 }
 
 function checkBarcodeForRemoving(barcode)
@@ -294,7 +318,8 @@ function initGrid() {
           fields: {
             ItemName: { type: "string" },
             Price: { type: "number" },
-            Barcode: { type: "number", from: "code" }
+            Barcode: { type: "number", from: "code" },
+            Amount: { type: "number" },
           }
         }
       }
@@ -306,6 +331,11 @@ function initGrid() {
       title: "Название продукта",
       width: '70%',
       template: '<h2>#=ItemName#</h2>'
+    },
+    {
+      field: "Amount",
+      title: "Количество",
+      template: '<h2>#=Amount#</h2>'
     },
     {
       field: "Price",

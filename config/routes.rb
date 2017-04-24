@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  resources :batches
+  TheRoleManagementPanel::Routes.mixin(self)
+
   resources :reports, only: :index do
     collection do
       get 'all_receipts'
@@ -8,16 +11,21 @@ Rails.application.routes.draw do
     end
   end
 
-  get '/items/search', to: 'items#search'
-  get '/items/barcode', to: 'items#barcode'
-  post '/receipts/close', to: 'receipts#close_receipt'
-  resources :receipts do
+  resources :receipts, only: [:new, :show] do
     collection do
-      get 'last_opened', to: 'receipts#last_opened'
+      get 'last_opened'
+      post 'close'
     end
   end
   resources :items do
     resources :barcodes
+    collection do
+      post 'addbarcode'
+      get 'search'
+      get 'process_cheque'
+      get 'barcode'
+      get 'list'
+    end
   end
 
   root to: 'visitors#index'

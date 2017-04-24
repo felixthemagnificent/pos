@@ -1,36 +1,31 @@
-<div id="item_barcodes_grid"></div>
+<div id="item_batches_grid"></div>
 <script type="text/javascript">
   function reloadGrid(item) {
-    $('#item_barcodes_grid').kendoGrid({
+    $('#item_batches_grid').kendoGrid({
       dataSource: {
         transport: {
           read:  {
-            url: "/items/" + item.id + "/barcodes.json",
+            url: "/batches/" + item + ".json",
           },
           update: {
-            url: function (barcode) {
-                return "/items/" + item.id + "/barcodes/" + barcode.id + ".json";
+            url: function (batch) {
+                return "/batches/" + batch.id + ".json";
               },
             type: "PATCH"
           },
           destroy: {
-            url: function (barcode) {
-              return "/items/" + item.id + "/barcodes/" + barcode.id + ".json";
+            url: function (batch) {
+              return "/batches/" + batch.id + ".json";
             },
             type: "DELETE"
-          },
-          create: {
-            url: "/items/" + item.id + "/barcodes",
-            type: "POST"
-          },
-
+          }
         },
         schema: {
             model: {
                 id: "id",
                 fields: {
-                    code: { type: "string" },
                     count: { type: "integer", validation: { min: 0, required: true }  },
+                    price: { type: "integer", validation: { min: 0, required: true }  },
                     updated_at: {
                       editable: false,
                       type: "datetime",
@@ -47,11 +42,14 @@
       sortable: true,
       editable: "inline",
       pageable: true,
-      toolbar: [{ name: "create", text: "Добавить" }],
       columns: [
           {
-              field: "code",
-              title: "Штрих-код",
+              field: "count",
+              title: "Количество",
+          },
+          {
+              field: "price",
+              title: "Цена",
           },
           {
               field: "updated_at",

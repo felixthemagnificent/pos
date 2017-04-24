@@ -1,7 +1,7 @@
 class ReceiptsController < ApplicationController
   before_action :set_receipt, only: [:show, :edit, :update, :destroy]
 
-  def close_receipt
+  def close
     data = {}
     status = :ok
     Receipt.transaction do
@@ -9,21 +9,10 @@ class ReceiptsController < ApplicationController
       if receipt.positions.count
         receipt.closed!
         receipt.positions.each do |position|
-          position.barcode.locked_amount = 0
-          position.barcode.save!
+          batch = position.batch #Batch.for_user(current_user).where(item: position.item).first
+          batch.locked_amount = 0
+          batch.save!
         end
-        # items.each_pair do |_,item|
-        #   barcode = item[:Barcode]
-        #   barcode_item = Barcode.for_user(current_user).find_by_code(barcode) # TODO rewrite with stock_item
-        #   if barcode_item
-        #     barcode_item.locked_amount = 0
-        #     barcode_item.save!
-        #   else
-        #     status = :unprocessable_entity
-        #     data = {reason: 'invalid_barcode', value: barcode}
-        #     raise ActiveRecord::Rollback
-        #   end
-        # end
         receipt.paid = params['paid']
         if receipt.paid < receipt.total
           status = :unprocessable_entity
@@ -42,20 +31,15 @@ class ReceiptsController < ApplicationController
   end
 
   def last_opened
-    positions = Receipt.for_user(User.first).last_opened.positions.map do |position|
+    positions = Receipt.for_user(current_user).last_opened.positions.map do |position|
         {
           ItemName: position.item.name,
-          Price: position.item.price,
-          Barcode: position.barcode.code
+          Price: Batch.where(item_id: position.item.id).where.not(count: 0).try(:first).try(:price),
+          Barcode: position.batch.barcode.code,
+          Amount: position.count
         }
-      end
+    end
     render json: positions
-  end
-
-  # GET /receipts
-  # GET /receipts.json
-  def index
-    @receipts = Receipt.where(user: current_user)
   end
 
   # GET /receipts/1
@@ -64,7 +48,13 @@ class ReceiptsController < ApplicationController
     respond_to do |format|
       format.html { render layout: false }
       format.json do
-        render json: @receipt.positions.map { |e| { name: e.item.name, price: e.item.price} }
+        render json: @receipt.positions.map { |e|
+          {
+            name: e.item.name,
+            price: Batch.for_user(current_user).where(item: e.item).first.price,
+            amount: e.count
+          }
+        }
       end
     end
   end
@@ -74,49 +64,6 @@ class ReceiptsController < ApplicationController
     Receipt.create!(user: current_user, status: :opened) unless Receipt.for_user(current_user).last_opened
   end
 
-  # GET /receipts/1/edit
-  def edit
-  end
-
-  # POST /receipts
-  # POST /receipts.json
-  def create
-    @receipt = Receipt.new(receipt_params)
-
-    respond_to do |format|
-      if @receipt.save
-        format.html { redirect_to @receipt, notice: 'Receipt was successfully created.' }
-        format.json { render :show, status: :created, location: @receipt }
-      else
-        format.html { render :new }
-        format.json { render json: @receipt.errors, status: :unprocessable_entity }
-      end
-    end
-  end
-
-  # PATCH/PUT /receipts/1
-  # PATCH/PUT /receipts/1.json
-  def update
-    respond_to do |format|
-      if @receipt.update(receipt_params)
-        format.html { redirect_to @receipt, notice: 'Receipt was successfully updated.' }
-        format.json { render :show, status: :ok, location: @receipt }
-      else
-        format.html { render :edit }
-        format.json { render json: @receipt.errors, status: :unprocessable_entity }
-      end
-    end
-  end
-
-  # DELETE /receipts/1
-  # DELETE /receipts/1.json
-  def destroy
-    @receipt.destroy
-    respond_to do |format|
-      format.html { redirect_to receipts_url, notice: 'Receipt was successfully destroyed.' }
-      format.json { head :no_content }
-    end
-  end
 
   private
     # Use callbacks to share common setup or constraints between actions.

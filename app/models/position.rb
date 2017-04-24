@@ -1,5 +1,5 @@
 class Position < ApplicationRecord
-  belongs_to :barcode
+  belongs_to :batch
   belongs_to :item
   belongs_to :receipt
 end

@@ -6,7 +6,7 @@ var itemsReady = function() {
 
   var myWindow = $("#window").kendoWindow({
     width: "800px",
-    title: "Партии",
+    title: "Баркоды",
     visible: false,
     actions: [
         "Close"
@@ -95,25 +95,6 @@ var itemsReady = function() {
               title: "Название продукта",
           },
           {
-              title: "Количество на складе",
-              field: "in_stock",
-              editable: false,
-              width: '15%'
-          },
-          {
-              field: "price",
-              title: "Цена",
-              width: '15%'
-          },
-          {
-              field: "updated_at",
-              title: "Последнее обновление",
-              format: "{0:dd/MM/yyyy HH:MM}",
-              filterable: false,
-              editable: false,
-              width: '13%'
-          },
-          {
             command: [
             {
               text: { // sets the text of the "Edit", "Update" and "Cancel" buttons
@@ -124,7 +105,7 @@ var itemsReady = function() {
               name: "edit",
             },
             {
-              text: "Партии",
+              text: "Баркоды",
               click: function (e) {
                 e.preventDefault();
                 var item = this.dataItem($(e.currentTarget).closest("tr"));

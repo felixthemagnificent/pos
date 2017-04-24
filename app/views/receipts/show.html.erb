@@ -14,6 +14,7 @@
                 fields: {
                     name: { type: "string" },
                     price: { type: "integer" },
+                    amount: { type: "integer" },
                 }
             }
         }
@@ -27,6 +28,13 @@
           {
               field: "name",
               title: "Продукт",
+          },
+          {
+              field: "amount",
+              title: "Количество",
+              filterable: false,
+              encoded: false,
+              width: '20%'
           },
           {
               title: "Цена",

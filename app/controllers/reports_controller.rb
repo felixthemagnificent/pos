@@ -1,4 +1,5 @@
 class ReportsController < ApplicationController
+  before_action :role_required
   def index
   end
 
@@ -65,7 +66,14 @@ class ReportsController < ApplicationController
       created_at: 'datetime',
       price: 'string'
     }
-    products = Item.for_user(User.first).map { |e| {name: e.name, price: e.price, receipts: Position.where(item: e).count} }
+    items = Position.joins(:receipt).where(receipts: {user: User.second}).map(&:item).map(&:id).uniq.map { |e| Item.find(e) }
+    products = items.map do |e|
+      {
+        name: e.name,
+        price: Batch.for_user(current_user).where(item: e).first.price,
+        receipts: Position.where(item: e).count
+      }
+    end
     products = products.sort_by { |e| e['receipts']  }
     products.each_with_index do |product, index|
       grid_data << { product: product[:name], place: index+1, count: product[:receipts], selled: product[:receipts]*product[:price]  }

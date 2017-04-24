@@ -8,7 +8,7 @@ class Receipt < ApplicationRecord
 
   def total
     total_sum = 0
-    items.each { |e| total_sum += e.price }
+    positions.each { |p| total_sum += Batch.for_user(user).where(item: p.item).first.price * p.count }
     total_sum
   end
 
@@ -30,9 +30,9 @@ class Receipt < ApplicationRecord
     strings << "Продажа №" + sell_count.to_s
     strings << cur_date_time
     strings << '*'*lineSize
-    self.items.each do |item|
-      product_name = item.name
-      product_price = item.price
+    self.positions.each do |position|
+      product_name = position.item.name
+      product_price = Batch.for_user(user).where(item: position.item).first.price
       if product_name.length + 1 + product_price.to_s.length <= lineSize
         strings << product_name.ljust(lineSize - product_price.to_s.length) + product_price.to_s
       else

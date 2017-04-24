@@ -10,9 +10,10 @@
       </button>
       <% if user_signed_in? %>
         <%= link_to 'Главная', root_path, class: 'navbar-brand' %>
-        <%= link_to 'Касса', new_receipt_path, class: 'navbar-brand' %>
-        <%= link_to 'Склад', items_path, class: 'navbar-brand' %>
-        <%= link_to 'Отчеты', reports_path, class: 'navbar-brand' %>
+        <%= link_to 'Касса', new_receipt_path, class: 'navbar-brand' if current_user.has_role?(:receipts,:new)  %>
+        <%= link_to 'Продукты', items_path, class: 'navbar-brand' if current_user.has_role?(:items,:edit) %>
+        <%= link_to 'Склад', batches_path, class: 'navbar-brand'  if current_user.has_role?(:batches,:index) %>
+        <%= link_to 'Отчеты', reports_path, class: 'navbar-brand' if current_user.has_role?(:reports,:index)%>
       <% end %>
     </div>
     <div class="collapse navbar-collapse">

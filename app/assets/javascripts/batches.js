@@ -1,4 +1,5 @@
-var batchItem;
+var batchItem = {};
+var writeOffID = 0;
 function getBatchGrid()
 {
   return $('#batches_grid').data('kendoGrid');
@@ -6,7 +7,34 @@ function getBatchGrid()
 var batchesReady = function() {
   var myBatchesWindow = $("#batches_window").kendoWindow({
     width: "800px",
-    title: "Партии",
+    title: "Журнал операций",
+    visible: false,
+    actions: [
+        "Close"
+    ],
+    close: function() {
+      getBatchGrid().dataSource.read();
+    }
+  }).data('kendoWindow');
+
+  var write_off_category_list = $('#write_off_category').kendoDropDownList({
+    width: 300,
+    autoWidth: true,
+    open: function (e) {
+      var listContainer = e.sender.list.closest(".k-list-container");
+      listContainer.width(listContainer.width() + kendo.support.scrollbar());
+    }
+  }).data('kendoDropDownList');
+  $('#write_off_amount').kendoNumericTextBox({
+    min: 1,
+    format: "n0",
+    round: true
+  });
+
+  write_off_category_list.list.width("auto");
+  var myWriteOffWindow = $("#write_off_window").kendoWindow({
+    width: "400px",
+    title: "Списание",
     visible: false,
     actions: [
         "Close"
@@ -26,6 +54,21 @@ var batchesReady = function() {
       getBatchGrid().dataSource.read();
     }
   }).data('kendoWindow');
+  $('#make_write_off').unbind('click').on('click',function() {
+    $.post({
+      url: '/batches/' + writeOffID +'/writeoff',
+      data: {
+        reason: $("#write_off_category").data('kendoDropDownList').value(),
+        amount: $("#write_off_amount").data('kendoNumericTextBox').value(),
+      },
+      success: function(data) {
+        writeOffID = 0;
+        myWriteOffWindow.close();
+        getBatchGrid().dataSource.read();
+        $("#write_off_amount").data('kendoNumericTextBox').value(1);
+      }
+    });
+  });
   $('#add_batch-button').unbind('click').click(function() {
     $('#batch_amount').val('');
     $('#batch_amount').prop('disabled',true);
@@ -35,6 +78,9 @@ var batchesReady = function() {
     $('#batch_product_name').html('');
     $('#find_product_open_window').addClass('hidden');
     $('#new_batch-window').modal('show');
+  });
+  $('#new_batch-window').on('shown.bs.modal', function() {
+    $(document).off('focusin.modal');
   });
   $('#save_batch').unbind('click').click(function() {
     $.post({
@@ -58,9 +104,25 @@ var batchesReady = function() {
       },
     })
   });
+  $('#batches_window_product_search').unbind('keyup').keyup(function(e) {
+    var product_name = this.value;
+    $('#search_product_window-grid').data('kendoGrid').dataSource.filter({field: 'name', operator: "contains", value: product_name});
+  });
+
+  $('#batches-main_product_search').unbind('keyup').keyup(function(e) {
+    var product_name = this.value;
+    if (e.which == ESC_KEY)
+    {
+      this.value = '';
+      product_name = '';
+    }
+    $('#batches_grid').data('kendoGrid').dataSource.filter({field: 'name', operator: "contains", value: product_name});
+
+  });
+
   $('#find_product_open_window-button').unbind('click').on('click',function() {
     searchProductWindow.center().open();
-    $('#search_product_window-grid').data('kendoGrid').dataSource.read();
+    $('#batches_grid').data('kendoGrid').dataSource.read();
   });
   $('#batch_barcode').unbind('keyup').keyup(function(e) {
     if(e.which == ENTER_KEY) {
@@ -136,6 +198,7 @@ var batchesReady = function() {
   $("#batches_grid").kendoGrid({
       dataSource: {
           dataType: "json",
+
           transport: {
               read: "/batches.json",
               update: {
@@ -152,6 +215,8 @@ var batchesReady = function() {
               },
           },
           schema: {
+              data: "data",
+              total: "total",
               model: {
                   id: "id",
                   fields: {
@@ -220,19 +285,37 @@ var batchesReady = function() {
           {
             command: [
             {
-              text: "Партии",
+              text: "Журнал операций",
               click: function (e) {
                 e.preventDefault();
                 var batch = getBatchGrid().dataItem($(e.currentTarget).closest("tr"));
                 $.get({
-                  url: '/batches/' + batch.item_id,
+                  url: '/batches/' + batch.id + '/journal',
                   success: function (data) {
                     myBatchesWindow.content(data);
                     myBatchesWindow.center().open();
                     myBatchesWindow.center();
-                    reloadGrid(batch.item_id);
+                    reloadGrid(batch.id);
                   }
                 });
+              }
+            },
+            {
+              text: "Списание",
+              click: function (e) {
+                e.preventDefault();
+                var batch = getBatchGrid().dataItem($(e.currentTarget).closest("tr"));
+                writeOffID = batch.id;
+                myWriteOffWindow.center().open();
+                // $.get({
+                //   url: '/batches/' + batch.id + '/journal',
+                //   success: function (data) {
+                //     myBatchesWindow.content(data);
+                //     myBatchesWindow.center().open();
+                //     myBatchesWindow.center();
+                //     reloadGrid(batch.id);
+                //   }
+                // });
               }
             },
             ],
@@ -241,5 +324,11 @@ var batchesReady = function() {
       ]
   });
 }
-$( document ).on('ready turbolinks:load',batchesReady);
+
+$( document ).on('ready turbolinks:load',function () {
+  if ($('#batches_grid').length)
+  {
+    batchesReady();
+  }
+});
 

@@ -1,5 +1,5 @@
 <div id="wrapper">
-  <h1 class="errors_label hidden">ВОЗВРАТ</h1>
+  <h1 class="errors_label hidden"></h1>
   <div id="receipts_grid"></div>
 
   <div id="cash_op">
@@ -21,6 +21,36 @@
       <button type="button" class="btn btn-default btn-lg" id="return_button">Возврат</button>
       <button type="button" class="btn btn-default btn-lg pull-right" id="close_cheque_button">Закрыть <br />чек</button>
     </div>
+    <div>
+      <button type="button" style="min-height: 100px;margin-top: 10px;width: 100%;" class="btn btn-default btn-lg" id="clear_receipt">Отмена чека</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="return_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Возврат</h4>
+      </div>
+      <div class="modal-body">
+          <input type="text" id="receipt_id" autofocus autocomplete="off">
+          <table class="table" id="return_table">
+            <thead>
+              <th>Продукт</th>
+              <th>Количество</th>
+            </thead>
+            <tbody>
+
+            </tbody>
+          </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+        <button type="button" class="btn btn-primary" id="submit_return">Оформить возврат</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -30,7 +60,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+        <h4 class="modal-title" id="myModalLabel">Оплата</h4>
       </div>
       <div class="modal-body">
         <div class="container">

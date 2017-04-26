@@ -1,5 +1,12 @@
 Rails.application.routes.draw do
-  resources :batches
+  resources :returns, only: [:index, :create]
+
+  resources :batches do
+    member do
+      get 'journal'
+      post 'writeoff'
+    end
+  end
   TheRoleManagementPanel::Routes.mixin(self)
 
   resources :reports, only: :index do
@@ -8,13 +15,15 @@ Rails.application.routes.draw do
       get 'mean_receipts'
       get 'total_sum_receipts'
       get 'popular_products'
+      get 'total_products'
     end
   end
 
-  resources :receipts, only: [:new, :show] do
+  resources :receipts, only: [:index, :new, :show] do
     collection do
       get 'last_opened'
       post 'close'
+      post 'clear'
     end
   end
   resources :items do

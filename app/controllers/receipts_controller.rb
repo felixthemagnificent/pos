@@ -1,4 +1,5 @@
 class ReceiptsController < ApplicationController
+  before_action :role_required
   before_action :set_receipt, only: [:show, :edit, :update, :destroy]
 
   def close
@@ -30,6 +31,24 @@ class ReceiptsController < ApplicationController
     render json: {cheque: data}, status: status
   end
 
+  def clear
+    data = {}
+    status = :ok
+    Receipt.transaction do
+      receipt = Receipt.for_user(current_user).last_opened
+      if receipt.positions.count
+      receipt.positions.each do |position|
+        batch = position.batch #Batch.for_user(current_user).where(item: position.item).first
+        batch.count += batch.locked_amount
+        batch.locked_amount = 0
+        batch.save!
+        position.destroy!
+       end
+      end
+    end
+    render json: nil, status: status
+  end
+
   def last_opened
     positions = Receipt.for_user(current_user).last_opened.positions.map do |position|
         {
@@ -51,8 +70,10 @@ class ReceiptsController < ApplicationController
         render json: @receipt.positions.map { |e|
           {
             name: e.item.name,
-            price: Batch.for_user(current_user).where(item: e.item).first.price,
-            amount: e.count
+            price: e.batch.price,
+            amount: e.count,
+            position_id: e.id,
+            batch_id: e.batch.id
           }
         }
       end

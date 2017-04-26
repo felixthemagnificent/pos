@@ -5,29 +5,16 @@
       dataSource: {
         transport: {
           read:  {
-            url: "/batches/" + item + ".json",
+            url: "/batches/" + item + "/journal.json",
           },
-          update: {
-            url: function (batch) {
-                return "/batches/" + batch.id + ".json";
-              },
-            type: "PATCH"
-          },
-          destroy: {
-            url: function (batch) {
-              return "/batches/" + batch.id + ".json";
-            },
-            type: "DELETE"
-          }
         },
         schema: {
             model: {
                 id: "id",
                 fields: {
-                    count: { type: "integer", validation: { min: 0, required: true }  },
-                    price: { type: "integer", validation: { min: 0, required: true }  },
-                    updated_at: {
-                      editable: false,
+                    amount: { type: "integer", validation: { min: 0, required: true }  },
+                    type: { type: "string" },
+                    date: {
                       type: "datetime",
                       parse: function(date) {
                              return kendo.parseDate(date)
@@ -40,35 +27,22 @@
       height: 400,
       filterable: false,
       sortable: true,
-      editable: "inline",
       pageable: true,
       columns: [
           {
-              field: "count",
+              field: "type",
+              title: "Тип операции",
+          },
+          {
+              field: "amount",
               title: "Количество",
           },
           {
-              field: "price",
-              title: "Цена",
-          },
-          {
-              field: "updated_at",
+              field: "date",
               title: "Последнее обновление",
-              format: "{0:dd/MM/yyyy HH:MM}",
+              format: "{0:dd/MM/yyyy hh:mm}",
               width: '24%'
           },
-          {
-            command: [
-            {
-              text: "Изменить",
-              name: 'edit'
-            },
-            {
-              text: "Удалить",
-              name: "destroy",
-            },
-            ]
-          }
         ]
       });
   }

@@ -1,47 +1,6 @@
 <div id="receipt_details_grid"></div>
 <script type="text/javascript">
   function reloadGrid(item) {
-    $('#receipt_details_grid').kendoGrid({
-      dataSource: {
-        transport: {
-          read:  {
-            url: "/receipts/" + item.id + ".json",
-          },
-        },
-        schema: {
-            model: {
-                id: "id",
-                fields: {
-                    name: { type: "string" },
-                    price: { type: "integer" },
-                    amount: { type: "integer" },
-                }
-            }
-        }
-      },
-      height: 400,
-      //filterable: false,
-      //sortable: true,
-      //editable: "inline",
-      //pageable: true,
-      columns: [
-          {
-              field: "name",
-              title: "Продукт",
-          },
-          {
-              field: "amount",
-              title: "Количество",
-              filterable: false,
-              encoded: false,
-              width: '20%'
-          },
-          {
-              title: "Цена",
-              field: "price",
-              width: '15%'
-          },
-        ]
-      });
+    $('#receipt_details_grid').kendoGrid();
   }
 </script>

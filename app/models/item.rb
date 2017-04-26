@@ -2,6 +2,7 @@ class Item < ApplicationRecord
   has_many :positions
   has_many :receipts, through: :positions
   has_many :barcodes, dependent: :destroy
+  validates :name, presence: true
   belongs_to :user
   default_scope { where(is_deleted: false) }
 

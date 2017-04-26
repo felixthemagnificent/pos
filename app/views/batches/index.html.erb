@@ -1,13 +1,31 @@
 <div id="batches_window">
 </div>
 <div id="search_product_window">
+  <div class="toolbar">
+    <input type="text" style="width: 100%;" class="k-input" id="batches_window_product_search"/>
+  </div>
    <div id="search_product_window-grid"></div>
 </div>
-<div class="toolbar">
-  <input type="text" style="width: 100%;" class="k-input" id="batches_window_product_search"/>
+
+<div id="write_off_window">
+  <div class="container" style="width: 350px">
+  Причина:
+    <select id="write_off_category" style="width: 280px;">
+      <% WriteOff.category_names.each_pair do |name, val|  %>
+        <option value="<%= name %>"><%= val %></option>
+      <% end %>
+    </select>
+    <br>
+    <br>
+    Количество:
+    <input id="write_off_amount" style="width: 260px" />
+    <br>
+    <br>
+    <button id="make_write_off" class="btn btn-primary pull-right">Оформить списание</button>
+  </div>
 </div>
 
-<div class="modal fade" id="new_batch-window" tabindex="-1" data-keyboard="false" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="new_batch-window" tabindex="-1" data-backdrop="static" data-keyboard="false" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -42,4 +60,5 @@
 <h1>Склад</h1>
 <a id="add_batch-button" class="btn btn-default">Добавить</a>
 <br>
+<input type="text" style="width: 100%;" class="k-input form-control" id="batches-main_product_search"/>
 <div id="batches_grid"></div>

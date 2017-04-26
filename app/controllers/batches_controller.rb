@@ -1,6 +1,6 @@
 class BatchesController < ApplicationController
   before_action :role_required
-  before_action :set_batch, only: [:update, :destroy]
+  before_action :set_batch, only: [:journal, :writeoff, :update, :destroy]
 
   # GET /batches
   # GET /batches.json
@@ -8,18 +8,76 @@ class BatchesController < ApplicationController
     respond_to do |format|
       format.html
       format.json do
-        item_ids = Batch.for_user(current_user).select(:item_id).distinct.map(&:item_id)
-        items = Item.where(id: item_ids).map { |e|
-          {
-            name: e.name,
-            item_id: e.id,
-            batch_count: Batch.where(item_id: e.id).count,
-            last_added: Batch.where(item_id: e.id).try(:last).try(:created_at),
-            price: Batch.where(item_id: e.id).where.not(count: 0).try(:first).try(:price),
-            amount: Batch.where(item_id: e.id).map(&:count).inject(&:+)
-          }
+        types = { name: "string" }
+        custom_field = { name: lambda do |name|
+          "(`items`.`name` like '%#{name}'%)"
+        end
         }
-        render json: items
+        items = Batch.for_user(current_user).joins(:item)
+        items, total = KendoFilter.filter_grid(params,items, types)
+        items = items.map do |e|
+          {
+            id: e.id,
+            name: e.item.name,
+            item_id: e.item.id,
+            batch_count: e.count,
+            last_added: e.created_at,
+            price: e.price,
+            amount: e.count
+          } if e.item
+        end
+        render json: {data:items, total: total }
+      end
+    end
+  end
+  def writeoff
+    amount = params[:amount].to_i
+    reason = params[:reason]
+    @batch.transaction do
+      raise ActiveRecord::Rollback if amount > @batch.count
+      WriteOff.create!(batch: @batch, item: @batch.item, amount: amount, reason: reason)
+      @batch.count -= amount
+      @batch.save
+    end
+    render json: nil
+  end
+
+  def journal
+    respond_to do |format|
+      format.html { render :show, layout: false }
+      format.json do
+        grid_data = []
+        receipts = Receipt.joins(:positions).where(positions: {batch: @batch})
+        writeoffs = WriteOff.where(batch: @batch)
+        receipts.each do |receipt|
+          grid_data << {
+            id: @batch_id,
+            type: 'Чек',
+            amount: Position.where(batch: @batch).try(:first).try(:count),
+            date: receipt.created_at
+          }
+        end
+        writeoffs.each do |writeoff|
+          grid_data << {
+            id: @batch_id,
+            type: 'Списание',
+            amount: writeoff.amount,
+            category: WriteOff.category_names[writeoff.reason.to_sym],
+            date: writeoff.created_at,
+          }
+        end
+
+        ReturnReceiptPosition.joins(:position).where(positions: {batch: @batch}).each do |rrp|
+          grid_data << {
+            id: @batch_id,
+            type: 'Возврат',
+            amount: rrp.amount,
+            date: rrp.created_at,
+          }
+        end
+
+        grid_data.sort_by! { |date| date[:date] }
+        render json: grid_data
       end
     end
   end

@@ -1,106 +1,10 @@
-var reportsReady = function() {
+var reportsReadyFunction = function() {
   var receiptDetailsWindow = $("#receipt_detail_window").kendoWindow({
     width: "400px",
     title: "Чек",
     visible: false
   }).data('kendoWindow');
-  var all_receipts_grid = $("#all_receipts_grid").kendoGrid({
-      dataSource: {
-          type: "jsonp",
-          transport: {
-              read: "/reports/all_receipts.json"
-          },
-          schema: {
-              data: "data",
-              total: "total",
-              model: {
-                  fields: {
-                      created_at: { type: "datetime",
-                      parse: function(date) {
-                             return kendo.parseDate(date)
-                          },
-                      },
-                      price: { type: "integer" }
 
-                  }
-              }
-          },
-          pageSize: 10,
-          serverPaging: true,
-          serverFiltering: true,
-          //serverSorting: true
-      },
-      //height: 350,
-      filterable: {
-          extra: false,
-          messages: {
-            and: "И",
-            or: "Или",
-            info: "Фильтр: ",
-            clear: "Очистить",
-            filter: "ОК"
-          },
-          operators: {
-              number:{
-                  eq: "Равно",
-                  gte: "Больше или равно",
-                  gt: "Больше",
-                  lte: "Меньше или равно",
-                  lt: "Меньше"
-              },
-              datetime: {
-                  gte: "После или равно",
-                  gt: "После",
-                  lte: "До или равно",
-                  lt: "До"
-              }
-          }
-      },
-      sortable: true,
-      pageable: true,
-      scrollable: true,
-      //filtermenu:filterMenuInit,
-      columns: [{
-              field: "created_at",
-              title: "Чек закрыт",
-              filterable: {
-                extra: true,
-                ui: function(element) {
-                  element.kendoDateTimePicker({
-                    format: "yyyy/MM/dd hh:mm"
-                  }); // initialize a Kendo UI DateTimePicker
-                }
-              }
-          },
-          {
-              field: "price",
-              title: "Цена",
-              filterable: false,
-              encoded: false
-          },
-          {
-            command: [
-            {
-              text: "Просмотр чека",
-              click: function (e) {
-                e.preventDefault();
-                var receipt = this.dataItem($(e.currentTarget).closest("tr"));
-                $.get({
-                  url: '/receipts/' + receipt.id,
-                  success: function (data) {
-                    receiptDetailsWindow.content(data);
-                    receiptDetailsWindow.center().open();
-                    receiptDetailsWindow.center();
-                    reloadGrid(receipt);
-                  }
-                });
-              }
-            },
-            ],
-          }
-
-      ]
-  });
   var mean_receipts_grid = $("#mean_receipts_grid").kendoGrid({
       dataSource: {
           type: "jsonp",
@@ -154,6 +58,10 @@ var reportsReady = function() {
               }
           }
       },
+      toolbar: ["excel"],
+      excel: {
+          allPages: true
+      },
       sortable: true,
       pageable: true,
       scrollable: true,
@@ -178,7 +86,7 @@ var reportsReady = function() {
 
       ]
   });
-    var total_sum_receipts_grid = $("#total_sum_receipts_grid").kendoGrid({
+  var total_sum_receipts_grid = $("#total_sum_receipts_grid").kendoGrid({
       dataSource: {
           type: "jsonp",
           transport: {
@@ -231,6 +139,10 @@ var reportsReady = function() {
               }
           }
       },
+      toolbar: ["excel"],
+      excel: {
+          allPages: true
+      },
       sortable: true,
       pageable: true,
       scrollable: true,
@@ -254,7 +166,7 @@ var reportsReady = function() {
           },
       ]
   });
-    var popular_products_grid = $("#popular_products_grid").kendoGrid({
+  var popular_products_grid = $("#popular_products_grid").kendoGrid({
       dataSource: {
           type: "jsonp",
           transport: {
@@ -303,6 +215,10 @@ var reportsReady = function() {
               }
           }
       },
+      toolbar: ["excel"],
+      excel: {
+          allPages: true
+      },
       sortable: true,
       pageable: true,
       scrollable: true,
@@ -333,8 +249,113 @@ var reportsReady = function() {
           },
       ]
   });
+  var total_products_grid = $("#total_products_grid").kendoGrid({
+      dataSource: {
+          dataType: "json",
+          transport: {
+              read: "/reports/total_products.json"
+          },
+          schema: {
+              model: {
+                  id: "id",
+                  fields: {
+                      name: { type: "string" },
+                      in_stock: { type: "number", editable: false },
+                      price: { type: "number" },
+                      updated_at: {
+                          type: "datetime",
+                          editable: false,
+                          parse: function(date) {
+                              return kendo.parseDate(date)
+                          },
+                      }
+
+                  }
+              }
+          },
+          pageSize: 20,
+          serverPaging: true,
+          serverFiltering: true,
+          serverSorting: true
+      },
+      height: 550,
+      toolbar: ["excel"],
+      excel: {
+          allPages: true
+      },
+      filterable: {
+          extra: false,
+          messages: {
+            info: "Фильтр: ",
+            clear: "Очистить",
+            filter: "ОК"
+          },
+          operators: {
+              number:{
+                  eq: "Равно",
+                  gte: "Больше или равно",
+                  gt: "Больше",
+                  lte: "Меньше или равно",
+                  lt: "Меньше"
+              },
+              datetime: {
+                  gte: "После или равно",
+                  gt: "После",
+                  lte: "До или равно",
+                  lt: "До"
+              }
+          }
+      },
+      sortable: true,
+      editable: {
+        mode: "inline",
+        confirmation:  "Вы правда хотите удалить продукт?"
+      },
+      pageable: true,
+      columns: [
+          {
+              field: "name",
+              title: "Название продукта",
+          },
+          {
+              field: "price",
+              title: "Цена",
+          },
+          {
+              field: "amount",
+              title: "Количество",
+          },
+          // {
+          //   command: [
+          //   {
+          //     text: "Партии",
+          //     click: function (e) {
+          //       e.preventDefault();
+          //       var batch = getBatchGrid().dataItem($(e.currentTarget).closest("tr"));
+          //       $.get({
+          //         url: '/batches/' + batch.item_id,
+          //         success: function (data) {
+          //           myBatchesWindow.content(data);
+          //           myBatchesWindow.center().open();
+          //           myBatchesWindow.center();
+          //           reloadGrid(batch.item_id);
+          //         }
+          //       });
+          //     }
+          //   },
+          //   ],
+          //   width: '24%'
+          // }
+      ]
+  });
 }
 
+var reportsReady = function () {
+  if (!$('#all_receipts_grid').data('kendoGrid'))
+  {
+    reportsReadyFunction();
+  }
+}
 
 $(reportsReady);
 $( document ).on('turbolinks:load',reportsReady);

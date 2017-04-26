@@ -22,6 +22,22 @@ class ReportsController < ApplicationController
     render json: {data: grid_data, total: total}
   end
 
+  def total_products
+    item_ids = Batch.for_user(current_user).select(:item_id).distinct.map(&:item_id)
+    items = Item.where(id: item_ids).map { |e|
+      {
+        name: e.name,
+        item_id: e.id,
+        batch_count: Batch.where(item_id: e.id).count,
+        last_added: Batch.where(item_id: e.id).try(:last).try(:created_at),
+        price: Batch.where(item_id: e.id).where.not(count: 0).try(:first).try(:price),
+        amount: Batch.where(item_id: e.id).map(&:count).inject(&:+)
+      }
+    }
+
+    render json: items
+  end
+
   def mean_receipts
     grid_data = []
     types = {

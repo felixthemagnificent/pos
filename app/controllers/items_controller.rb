@@ -58,10 +58,13 @@ class ItemsController < ApplicationController
             batch.count += 1
             batch.locked_amount -= 1
             batch.save!
-            if Receipt.for_user(current_user).last_opened.positions.where(batch: batch, item: @item).try(:first).try(:count) > 0
-              item = Receipt.for_user(current_user).last_opened.positions.where(barcode: @barcode, item: @item).first
-            else
-              item = Receipt.for_user(current_user).last_opened.positions.where(barcode: @barcode, item: @item).first
+            count = Receipt.for_user(current_user).last_opened.positions.where(batch: batch, item: @item).try(:first).try(:count)
+            if count && count > 1
+              item = Receipt.for_user(current_user).last_opened.positions.where(batch: batch, item: @item).first
+              item.count -= 1
+              item.save!
+            elsif count && count == 1
+              item = Receipt.for_user(current_user).last_opened.positions.where(batch: batch, item: @item).first
               Receipt.for_user(current_user).last_opened.positions.delete item
             end
           end

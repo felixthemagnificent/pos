@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170422192615) do
+ActiveRecord::Schema.define(version: 20170426212050) do
 
   create_table "barcodes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string   "code"
@@ -66,6 +66,25 @@ ActiveRecord::Schema.define(version: 20170422192615) do
     t.index ["user_id"], name: "index_receipts_on_user_id", using: :btree
   end
 
+  create_table "return_receipt_positions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer  "position_id"
+    t.integer  "amount"
+    t.integer  "return_receipt_id"
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.index ["position_id"], name: "index_return_receipt_positions_on_position_id", using: :btree
+    t.index ["return_receipt_id"], name: "index_return_receipt_positions_on_return_receipt_id", using: :btree
+  end
+
+  create_table "return_receipts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer  "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer  "receipt_id"
+    t.index ["receipt_id"], name: "index_return_receipts_on_receipt_id", using: :btree
+    t.index ["user_id"], name: "index_return_receipts_on_user_id", using: :btree
+  end
+
   create_table "roles", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string   "name",                      null: false
     t.string   "title",                     null: false
@@ -95,6 +114,17 @@ ActiveRecord::Schema.define(version: 20170422192615) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
   end
 
+  create_table "write_offs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer  "batch_id"
+    t.integer  "item_id"
+    t.integer  "amount"
+    t.integer  "reason"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["batch_id"], name: "index_write_offs_on_batch_id", using: :btree
+    t.index ["item_id"], name: "index_write_offs_on_item_id", using: :btree
+  end
+
   add_foreign_key "barcodes", "items"
   add_foreign_key "batches", "barcodes"
   add_foreign_key "batches", "items"
@@ -104,4 +134,10 @@ ActiveRecord::Schema.define(version: 20170422192615) do
   add_foreign_key "positions", "items"
   add_foreign_key "positions", "receipts"
   add_foreign_key "receipts", "users"
+  add_foreign_key "return_receipt_positions", "positions"
+  add_foreign_key "return_receipt_positions", "return_receipts"
+  add_foreign_key "return_receipts", "receipts"
+  add_foreign_key "return_receipts", "users"
+  add_foreign_key "write_offs", "batches"
+  add_foreign_key "write_offs", "items"
 end

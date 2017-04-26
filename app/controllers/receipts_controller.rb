@@ -23,7 +23,7 @@ class ReceiptsController < ApplicationController
 
         receipt.save!
         Receipt.create!(user: current_user, status: :opened)
-        data = receipt.getCheque
+        data = receipt.getCheque(current_user)
       else
         raise ActiveRecord::Rollback
       end

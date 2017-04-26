@@ -314,6 +314,10 @@ function handleReturnModal()
       },
       success: function(data) {
         $('#return_modal').modal('hide');
+        $.post({
+          url: 'http://localhost:8332/printcheque',
+          data: data
+        });
       }
     });
   });

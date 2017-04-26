@@ -13,6 +13,6 @@ class ReturnsController < ApplicationController
         position.batch.save!
       end
     end
-    render json: nil
+    render json: { cheque: return_receipt.getCheque }
   end
 end

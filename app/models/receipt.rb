@@ -21,11 +21,11 @@ class Receipt < ApplicationRecord
     where(status: :opened).last
   end
 
-  def getCheque
+  def getCheque(current_user)
     lineSize = 26
     strings = []
     company = self.user.company_name
-    sell_count = Receipt.all.count
+    sell_count = Receipt.for_user(self.user).where(status: :closed).last.id
     cur_date_time = DateTime.now.strftime('%d/%m/%Y %H:%M')
     strings << company.center(lineSize, " ") if company
     strings << "Продажа №" + sell_count.to_s
@@ -33,7 +33,7 @@ class Receipt < ApplicationRecord
     strings << '*'*lineSize
     self.positions.each do |position|
       product_name = position.item.name
-      product_price = Batch.for_user(user).where(item: position.item).first.price
+      product_price = position.batch.price
       if product_name.length + 1 + product_price.to_s.length <= lineSize
         strings << product_name.ljust(lineSize - product_price.to_s.length) + product_price.to_s
       else

@@ -2,10 +2,21 @@ class Receipt < ApplicationRecord
   has_many :positions, dependent: :destroy
   has_many :items, through: :positions
   belongs_to :user
+  belongs_to :company
   before_save :update_total
   scope :for_user, ->(user) { where(user: user) }
   scope :today, -> { where(created_at: DateTime.now.beginning_of_day..DateTime.now.end_of_day) }
   enum status: [:opened, :closed]
+
+  def self.resolve(current_user)
+    if current_user.admin?
+      all
+    elsif current_user.company?
+      where(company: current_user.company)
+    else
+      none
+    end
+  end
 
   def update_total
     total_sum = 0
@@ -24,7 +35,7 @@ class Receipt < ApplicationRecord
   def getCheque(current_user)
     lineSize = 26
     strings = []
-    company = self.user.company_name
+    company = self.user.company.name
     sell_count = Receipt.for_user(self.user).where(status: :closed).last.id
     cur_date_time = DateTime.now.strftime('%d/%m/%Y %H:%M')
     strings << company.center(lineSize, " ") if company

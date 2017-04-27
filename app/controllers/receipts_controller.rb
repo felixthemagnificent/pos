@@ -6,7 +6,7 @@ class ReceiptsController < ApplicationController
     data = {}
     status = :ok
     Receipt.transaction do
-      receipt = Receipt.for_user(current_user).last_opened
+      receipt = Receipt.resolve(current_user).last_opened
       if receipt.positions.count
         receipt.closed!
         receipt.positions.each do |position|
@@ -22,7 +22,7 @@ class ReceiptsController < ApplicationController
         end
 
         receipt.save!
-        Receipt.create!(user: current_user, status: :opened)
+        Receipt.create!(user: current_user, company: current_user.company, status: :opened) unless Receipt.for_user(current_user).last_opened
         data = receipt.getCheque(current_user)
       else
         raise ActiveRecord::Rollback
@@ -82,7 +82,7 @@ class ReceiptsController < ApplicationController
 
   # GET /receipts/new
   def new
-    Receipt.create!(user: current_user, status: :opened) unless Receipt.for_user(current_user).last_opened
+    Receipt.create!(user: current_user, company: current_user.company, status: :opened) unless Receipt.for_user(current_user).last_opened
   end
 
 

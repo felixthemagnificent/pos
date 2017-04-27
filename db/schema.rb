@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170426212050) do
+ActiveRecord::Schema.define(version: 20170427071140) do
 
   create_table "barcodes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string   "code"
@@ -29,9 +29,17 @@ ActiveRecord::Schema.define(version: 20170426212050) do
     t.integer  "price"
     t.integer  "locked_amount", default: 0
     t.integer  "barcode_id"
+    t.integer  "company_id"
     t.index ["barcode_id"], name: "index_batches_on_barcode_id", using: :btree
+    t.index ["company_id"], name: "index_batches_on_company_id", using: :btree
     t.index ["item_id"], name: "index_batches_on_item_id", using: :btree
     t.index ["user_id"], name: "index_batches_on_user_id", using: :btree
+  end
+
+  create_table "companies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string   "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -40,6 +48,8 @@ ActiveRecord::Schema.define(version: 20170426212050) do
     t.datetime "updated_at", null: false
     t.integer  "user_id"
     t.boolean  "is_deleted"
+    t.integer  "company_id"
+    t.index ["company_id"], name: "index_items_on_company_id", using: :btree
     t.index ["user_id"], name: "index_items_on_user_id", using: :btree
   end
 
@@ -63,6 +73,8 @@ ActiveRecord::Schema.define(version: 20170426212050) do
     t.integer  "paid"
     t.integer  "user_id"
     t.integer  "status"
+    t.integer  "company_id"
+    t.index ["company_id"], name: "index_receipts_on_company_id", using: :btree
     t.index ["user_id"], name: "index_receipts_on_user_id", using: :btree
   end
 
@@ -81,6 +93,8 @@ ActiveRecord::Schema.define(version: 20170426212050) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer  "receipt_id"
+    t.integer  "company_id"
+    t.index ["company_id"], name: "index_return_receipts_on_company_id", using: :btree
     t.index ["receipt_id"], name: "index_return_receipts_on_receipt_id", using: :btree
     t.index ["user_id"], name: "index_return_receipts_on_user_id", using: :btree
   end
@@ -110,6 +124,8 @@ ActiveRecord::Schema.define(version: 20170426212050) do
     t.string   "name"
     t.string   "company_name"
     t.integer  "role_id"
+    t.integer  "company_id"
+    t.index ["company_id"], name: "index_users_on_company_id", using: :btree
     t.index ["email"], name: "index_users_on_email", unique: true, using: :btree
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
   end
@@ -127,17 +143,22 @@ ActiveRecord::Schema.define(version: 20170426212050) do
 
   add_foreign_key "barcodes", "items"
   add_foreign_key "batches", "barcodes"
+  add_foreign_key "batches", "companies"
   add_foreign_key "batches", "items"
   add_foreign_key "batches", "users"
+  add_foreign_key "items", "companies"
   add_foreign_key "items", "users"
   add_foreign_key "positions", "batches"
   add_foreign_key "positions", "items"
   add_foreign_key "positions", "receipts"
+  add_foreign_key "receipts", "companies"
   add_foreign_key "receipts", "users"
   add_foreign_key "return_receipt_positions", "positions"
   add_foreign_key "return_receipt_positions", "return_receipts"
+  add_foreign_key "return_receipts", "companies"
   add_foreign_key "return_receipts", "receipts"
   add_foreign_key "return_receipts", "users"
+  add_foreign_key "users", "companies"
   add_foreign_key "write_offs", "batches"
   add_foreign_key "write_offs", "items"
 end

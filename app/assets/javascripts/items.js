@@ -34,23 +34,16 @@ var itemsReady = function() {
                 },
                 type: "DELETE"
               },
+              // parameterMap: function(options, operation) {
+              //   if (operation !== "read" && options) {
+              //     return {models: kendo.stringify(options)};
+              //   }
+              // }
           },
           schema: {
               model: {
                   id: "id",
-                  fields: {
-                      name: { type: "string" },
-                      in_stock: { type: "number", editable: false },
-                      price: { type: "number" },
-                      updated_at: {
-                          type: "datetime",
-                          editable: false,
-                          parse: function(date) {
-                              return kendo.parseDate(date)
-                          },
-                      }
-
-                  }
+                  fields: ["name"]
               }
           },
           pageSize: 20,
@@ -84,10 +77,7 @@ var itemsReady = function() {
           }
       },
       sortable: true,
-      editable: {
-        mode: "inline",
-        confirmation:  "Вы правда хотите удалить продукт?"
-      },
+      editable: "inline",
       pageable: true,
       columns: [
           {

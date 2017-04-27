@@ -13,7 +13,7 @@ class BatchesController < ApplicationController
           "(`items`.`name` like '%#{name}'%)"
         end
         }
-        items = Batch.for_user(current_user).joins(:item)
+        items = Batch.resolve(current_user).joins(:item)
         items, total = KendoFilter.filter_grid(params,items, types)
         items = items.map do |e|
           {
@@ -99,6 +99,7 @@ class BatchesController < ApplicationController
   def create
     @batch = Batch.new
     @batch.item = Item.find(params[:item_id])
+    @batch.company = current_user.company if current_user.company?
     @batch.count = params[:amount].to_i
     @batch.price = params[:price].to_i
     @batch.barcode = Barcode.find_by_code params[:barcode]

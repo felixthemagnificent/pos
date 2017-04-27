@@ -110,9 +110,7 @@ class ItemsController < ApplicationController
   def create
     @item = Item.new(item_params)
     @item.user = current_user
-    puts item_params.inspect
-    @item.valid?
-    puts @item.errors.full_messages
+    @item.company = current_user.company
     if @item.save
       render json: @item, status: :created
     else

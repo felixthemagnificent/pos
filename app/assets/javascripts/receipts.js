@@ -265,6 +265,8 @@ function clearCheque()
     success: function(e) {
       getGrid().dataSource.read();
       $('#user_interaction').val('');
+      receiptOpened = false;
+      updateButtons();
     }
   });
 }
@@ -338,6 +340,7 @@ function handleButtons()
   $('#close_cheque_button').unbind('click').on('click',function() {
     closeCheque();
   });
+  $('#clear_receipt').on('click',clearCheque);
 }
 function handleTextInput()
 {

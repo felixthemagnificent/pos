@@ -4,7 +4,7 @@ class ReportsController < ApplicationController
   end
 
   def all_receipts
-    receipts = Receipt.for_user(current_user).where.not(status: :opened)
+    receipts = Receipt.resolve(current_user).where.not(status: :opened)
     grid_data = []
     types = {
       created_at: 'datetime',
@@ -23,7 +23,7 @@ class ReportsController < ApplicationController
   end
 
   def total_products
-    item_ids = Batch.for_user(current_user).select(:item_id).distinct.map(&:item_id)
+    item_ids = Batch.resolve(current_user).select(:item_id).distinct.map(&:item_id)
     items = Item.where(id: item_ids).map { |e|
       {
         name: e.name,
@@ -44,7 +44,7 @@ class ReportsController < ApplicationController
       created_at: 'datetime',
       price: 'string'
     }
-    all_closed_receipts = Receipt.for_user(current_user).where.not(status: :opened)
+    all_closed_receipts = Receipt.resolve(current_user).where.not(status: :opened)
 
     receipts, total = KendoFilter.filter_grid(params, all_closed_receipts, types)
 
@@ -64,7 +64,7 @@ class ReportsController < ApplicationController
       created_at: 'datetime',
       price: 'string'
     }
-    all_closed_receipts = Receipt.for_user(current_user).where.not(status: :opened)
+    all_closed_receipts = Receipt.resolve(current_user).where.not(status: :opened)
     receipts, total = KendoFilter.filter_grid(params, all_closed_receipts, types)
 
     dates = receipts.pluck(:created_at).map(&:to_date).uniq
@@ -86,7 +86,7 @@ class ReportsController < ApplicationController
     products = items.map do |e|
       {
         name: e.name,
-        price: Batch.for_user(current_user).where(item: e).first.price,
+        price: Batch.resolve(current_user).where(item: e).first.price,
         receipts: Position.where(item: e).count
       }
     end

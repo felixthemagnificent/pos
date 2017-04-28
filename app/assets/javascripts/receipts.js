@@ -217,14 +217,18 @@ function closeReceipt()
 
 function openAmountPaidModal()
 {
+  $('#cash_modal').on('shown.bs.modal', function () {
+    $('#cash_received').focus();
+    $('#cash_received').val('');
+  });
   $('#cash_modal').modal('show');
   isModalOpen = true;
-  $('#cash_received').focus();
 }
 
 function closeAmountPaidModal()
 {
   $('#cash_modal').modal('hide');
+  $('#cash_modal').unbind('shown.bs.modal');
   isModalOpen = false;
   $('#user_interaction').focus();
 }

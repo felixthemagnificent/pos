@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170427071140) do
+ActiveRecord::Schema.define(version: 20170429131351) do
 
   create_table "barcodes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string   "code"
@@ -24,12 +24,13 @@ ActiveRecord::Schema.define(version: 20170427071140) do
     t.integer  "item_id"
     t.integer  "user_id"
     t.integer  "count"
-    t.datetime "created_at",                null: false
-    t.datetime "updated_at",                null: false
+    t.datetime "created_at",                 null: false
+    t.datetime "updated_at",                 null: false
     t.integer  "price"
-    t.integer  "locked_amount", default: 0
+    t.integer  "locked_amount",  default: 0
     t.integer  "barcode_id"
     t.integer  "company_id"
+    t.integer  "supplier_price"
     t.index ["barcode_id"], name: "index_batches_on_barcode_id", using: :btree
     t.index ["company_id"], name: "index_batches_on_company_id", using: :btree
     t.index ["item_id"], name: "index_batches_on_item_id", using: :btree

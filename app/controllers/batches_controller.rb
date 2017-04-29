@@ -23,6 +23,7 @@ class BatchesController < ApplicationController
             batch_count: e.count,
             last_added: e.created_at,
             price: e.price,
+            supplier_price: e.supplier_price,
             amount: e.count
           } if e.item
         end
@@ -102,6 +103,7 @@ class BatchesController < ApplicationController
     @batch.company = current_user.company if current_user.company?
     @batch.count = params[:amount].to_i
     @batch.price = params[:price].to_i
+    @batch.supplier_price = params[:supplier_price].to_i
     @batch.barcode = Barcode.find_by_code params[:barcode]
     @batch.user = current_user
     respond_to do |format|
@@ -117,15 +119,12 @@ class BatchesController < ApplicationController
   # PATCH/PUT /batches/1.json
   def update
     @batch.price = params[:price].to_i
-    @batch.count = params[:count].to_i
-    respond_to do |format|
-      if @batch.save
-        format.html { redirect_to @batch, notice: 'Batch was successfully updated.' }
-        format.json { render json: nil, status: :ok}
-      else
-        format.html { render :edit }
-        format.json { render json: @batch.errors, status: :unprocessable_entity }
-      end
+    @batch.supplier_price = params[:supplier_price].to_i
+    @batch.count = params[:amount].to_i if current_user.admin?
+    if @batch.save
+      render json: nil, status: :ok
+    else
+      render json: @batch.errors, status: :unprocessable_entity
     end
   end
 
@@ -133,10 +132,7 @@ class BatchesController < ApplicationController
   # DELETE /batches/1.json
   def destroy
     @batch.destroy
-    respond_to do |format|
-      format.html { redirect_to batches_url, notice: 'Batch was successfully destroyed.' }
-      format.json { head :no_content }
-    end
+    head :no_content
   end
 
   private

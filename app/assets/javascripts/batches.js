@@ -73,6 +73,8 @@ var batchesReady = function() {
     $('#batch_amount').val('');
     $('#batch_amount').prop('disabled',true);
     $('#batch_barcode').val('');
+    $('#batch_supplier_price').val('');
+    $('#batch_supplier_price').prop('disabled', true);
     $('#batch_price').prop('disabled',true);
     $('#batch_price').val('');
     $('#batch_product_name').html('');
@@ -138,6 +140,7 @@ var batchesReady = function() {
           $('#batch_product_name').html(name);
           $('#batch_amount').prop('disabled',false);
           $('#batch_price').prop('disabled',false);
+          $('#batch_supplier_price').prop('disabled', false);
           $('#find_product_open_window').addClass('hidden');
         },
         error: function (data) {
@@ -190,6 +193,7 @@ var batchesReady = function() {
             $('#find_product_open_window').addClass('hidden');
             $('#batch_amount').prop('disabled',false);
             $('#batch_price').prop('disabled',false);
+            $('#batch_supplier_price').prop('disabled', false);
             batchItem.id = selectedDataItem.item_id;
           }
         })
@@ -223,6 +227,7 @@ var batchesReady = function() {
                       name: { type: "string" },
                       in_stock: { type: "number", editable: false },
                       price: { type: "number" },
+                      supplier_price: { type: "number" },
                       updated_at: {
                           type: "datetime",
                           editable: false,
@@ -276,7 +281,11 @@ var batchesReady = function() {
           },
           {
               field: "price",
-              title: "Цена",
+              title: "Отпускная цена",
+          },
+          {
+              field: "supplier_price",
+              title: "Цена поставщика",
           },
           {
               field: "amount",
@@ -284,6 +293,14 @@ var batchesReady = function() {
           },
           {
             command: [
+            {
+              text: { // sets the text of the "Edit", "Update" and "Cancel" buttons
+                    edit: "Изменить",
+                    update: "Сохранить",
+                    cancel: "Отмена"
+                },
+              name: "edit",
+            },
             {
               text: "Журнал операций",
               click: function (e) {

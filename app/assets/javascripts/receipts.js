@@ -452,7 +452,8 @@ function initAllReceiptsGrid()
                              return kendo.parseDate(date)
                           },
                       },
-                      price: { type: "integer" }
+                      price: { type: "integer" },
+                      profit: { type: "integer" }
 
                   }
               }
@@ -518,8 +519,14 @@ function initAllReceiptsGrid()
               }
           },
           {
-              field: "price",
-              title: "Цена",
+              field: "income",
+              title: "Cумма чека",
+              filterable: false,
+              encoded: false
+          },
+          {
+              field: "profit",
+              title: "Прибыль",
               filterable: false,
               encoded: false
           },

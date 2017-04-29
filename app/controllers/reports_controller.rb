@@ -16,7 +16,9 @@ class ReportsController < ApplicationController
       grid_data.push({
         id: receipt.id,
         created_at: receipt.created_at.strftime("%m/%d/%Y %I:%M %p"),
-        price: receipt.total,
+        income: receipt.total,
+        profit: receipt.positions.map { |e| e.count * (e.batch.price - e.batch.supplier_price) } .inject(&:+)
+
       })
     end
     render json: {data: grid_data, total: total}

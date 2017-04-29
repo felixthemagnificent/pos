@@ -53,7 +53,7 @@ class ReceiptsController < ApplicationController
     positions = Receipt.for_user(current_user).last_opened.positions.map do |position|
         {
           ItemName: position.item.name,
-          Price: Batch.where(item_id: position.item.id).where.not(count: 0).try(:first).try(:price),
+          Price: position.batch.price,
           Barcode: position.batch.barcode.code,
           Amount: position.count
         }
@@ -71,6 +71,7 @@ class ReceiptsController < ApplicationController
           {
             name: e.item.name,
             price: e.batch.price,
+            supplier_price: e.batch.supplier_price,
             amount: e.count,
             position_id: e.id,
             batch_id: e.batch.id

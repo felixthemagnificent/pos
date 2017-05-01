@@ -9,7 +9,7 @@
     <%= stylesheet_link_tag 'kendo.bootstrap.min.css', media: 'all' %>
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track' => 'reload' %>
     <%= javascript_include_tag 'application', 'data-turbolinks-track' => 'reload' %>
-    <%= javascript_include_tag 'kendo.all.min' %>
+    <%= javascript_include_tag 'kendo.all.min' if current_user %>
     <%= csrf_meta_tags %>
   </head>
   <body>

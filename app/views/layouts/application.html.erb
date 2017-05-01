@@ -3,10 +3,10 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= content_for?(:title) ? yield(:title) : "Pos" %></title>
-    <meta name="description" content="<%= content_for?(:description) ? yield(:description) : "Pos" %>">
-    <%= stylesheet_link_tag 'kendo.common-bootstrap.min', media: 'all' %>
-    <%= stylesheet_link_tag 'kendo.bootstrap.mobile.min', media: 'all' %>
-    <%= stylesheet_link_tag 'kendo.bootstrap.min.css', media: 'all' %>
+    <meta name="description" content="<%= content_for?(:description) ? yield(:description) : "CloudPOS" %>">
+    <%= stylesheet_link_tag 'kendo.common-bootstrap.min', media: 'all' if current_user %>
+    <%= stylesheet_link_tag 'kendo.bootstrap.mobile.min', media: 'all' if current_user %>
+    <%= stylesheet_link_tag 'kendo.bootstrap.min.css', media: 'all' if current_user  %>
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track' => 'reload' %>
     <%= javascript_include_tag 'application', 'data-turbolinks-track' => 'reload' %>
     <%= javascript_include_tag 'kendo.all.min' if current_user %>

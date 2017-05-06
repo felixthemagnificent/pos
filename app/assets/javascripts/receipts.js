@@ -66,7 +66,8 @@ function recalculatePrice()
   var grid = $('#receipts_grid').data('kendoGrid');
   var totalPrice = 0;
   $(grid.dataItems()).each(function () {
-    totalPrice += this.Price * this.Amount;
+    var tempPrice = this.Price * this.Amount;
+    totalPrice += this.have_weight ? tempPrice/1000 : tempPrice;
   });
   if (totalPrice)
   {
@@ -90,17 +91,6 @@ function addDataToGrid(data)
 {
   var grid = getGrid();
   var item = findBarcodeInGrid(data.code)
-  // if (item)
-  // {
-  //   item.Quantity++;
-  // } else {
-  //   grid.dataSource.add({
-  //     ItemName: data.name,
-  //     Price: data.price,
-  //     Barcode: data.code,
-  //     Quantity: 1
-  //   });
-  // }
   updateGrid();
   $('#receive_money_button').prop('disabled', false);
   $('#close_cheque_button').prop('disabled', false);
@@ -112,14 +102,28 @@ function addDataToGrid(data)
 
 function addToGridByBarcode(barcode)
 {
+  var amount = 1;
   $.get({
-    url: '/items/process_cheque',
-    data: {
-      barcode: barcode
-    },
-    success: addDataToGrid,
-    error: addDataErrors
+    url: '/items/search',
+    data: { barcode: barcode },
+    success: function(data) {
+      if (data.have_weight) {
+        var person = prompt("Введите вес", "0");
+        if (person == null) return;
+        amount = parseInt(person);
+      }
+      $.get({
+        url: '/items/process_cheque',
+        data: {
+          barcode: barcode,
+          amount: amount
+        },
+        success: addDataToGrid,
+        error: addDataErrors
+      });
+    }
   });
+
 }
 
 function removeFromGridByBarcode(barcode)
@@ -547,6 +551,7 @@ function initGrid() {
             Price: { type: "number" },
             Barcode: { type: "number", from: "code" },
             Amount: { type: "number" },
+            have_weight: {type: "boolean"}
           }
         }
       }
@@ -563,7 +568,7 @@ function initGrid() {
     {
       field: "Amount",
       title: "Количество",
-      template: '<h2>#=Amount#</h2>'
+      template: '<h2>#=Amount# # if (have_weight)  {# г. #} #</h2>'
     },
     {
       field: "Price",
@@ -581,4 +586,6 @@ var docReady = function() {
   initAllReceiptsGrid();
   handleReturnModal();
 };
-$(docReady);
+$(function() {
+  if ($().kendoWindow != undefined) { docReady(); }
+});

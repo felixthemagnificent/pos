@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170429131351) do
+ActiveRecord::Schema.define(version: 20170502210020) do
 
   create_table "barcodes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.string   "code"
@@ -44,12 +44,13 @@ ActiveRecord::Schema.define(version: 20170429131351) do
   end
 
   create_table "items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string   "name",                    collation: "utf8mb4_general_ci"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.string   "name",                     collation: "utf8mb4_general_ci"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
     t.integer  "user_id"
     t.boolean  "is_deleted"
     t.integer  "company_id"
+    t.boolean  "have_weight"
     t.index ["company_id"], name: "index_items_on_company_id", using: :btree
     t.index ["user_id"], name: "index_items_on_user_id", using: :btree
   end

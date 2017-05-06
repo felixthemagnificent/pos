@@ -17,7 +17,7 @@ class ReportsController < ApplicationController
         id: receipt.id,
         created_at: receipt.created_at.strftime("%m/%d/%Y %I:%M %p"),
         income: receipt.total,
-        profit: receipt.positions.map { |e| e.count * (e.batch.price - e.batch.supplier_price) } .inject(&:+)
+        profit: receipt.positions.map { |e| (e.item.have_weight ? e.count / 1000 : e.count) * (e.batch.price - e.batch.supplier_price) } .inject(&:+)
 
       })
     end

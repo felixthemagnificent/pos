@@ -27,11 +27,14 @@ var batchesReady = function() {
   }).data('kendoDropDownList');
   $('#write_off_amount').kendoNumericTextBox({
     min: 1,
-    format: "n0",
-    round: true
+    //format: "n0",
+    //round: true
   });
 
-  write_off_category_list.list.width("auto");
+  if (write_off_category_list)
+  {
+    write_off_category_list.list.width("auto");
+  }
   var myWriteOffWindow = $("#write_off_window").kendoWindow({
     width: "400px",
     title: "Списание",
@@ -228,6 +231,7 @@ var batchesReady = function() {
                       in_stock: { type: "number", editable: false },
                       price: { type: "number" },
                       supplier_price: { type: "number" },
+                      have_weight: { type: "boolean" },
                       updated_at: {
                           type: "datetime",
                           editable: false,
@@ -271,7 +275,7 @@ var batchesReady = function() {
       sortable: true,
       editable: {
         mode: "inline",
-        confirmation:  "Вы правда хотите удалить продукт?"
+        confirmation:  "Вы правда хотите удалить продукт?",
       },
       pageable: true,
       columns: [
@@ -290,6 +294,25 @@ var batchesReady = function() {
           {
               field: "amount",
               title: "Количество",
+              template: "# if (have_weight) {# #= amount # кг #} else {# #= amount# #}#",
+              editor: function(container, options) {
+                $('<div class="input-group">'+
+                  '<input type="text" name="' + options.field +'" class="form-control" aria-describedby="basic-addon2">'+
+                  (options.model.have_weight ? '<span class="input-group-addon" id="basic-addon2">кг</span>' : '')+
+                  '</div>')
+                        .appendTo(container);
+                        // .kendoDropDownList({
+                        //     autoBind: false,
+                        //     dataTextField: "CategoryName",
+                        //     dataValueField: "CategoryID",
+                        //     dataSource: {
+                        //         type: "odata",
+                        //         transport: {
+                        //             read: "https://demos.telerik.com/kendo-ui/service/Northwind.svc/Categories"
+                        //         }
+                        //     }
+                        // });
+              }
           },
           {
             command: [
@@ -342,10 +365,6 @@ var batchesReady = function() {
   });
 }
 
-$( document ).on('ready turbolinks:load',function () {
-  if ($('#batches_grid').length)
-  {
-    batchesReady();
-  }
+$(function() {
+  if ($().kendoWindow != undefined) { batchesReady(); }
 });
-

@@ -42,7 +42,7 @@ class ItemsController < ApplicationController
 
   def search
     if @item
-      render json: @item.slice(:name, :id)
+      render json: @item.slice(:name, :id, :have_weight)
     else
       render json: nil, status: :unprocessable_entity
     end
@@ -50,42 +50,61 @@ class ItemsController < ApplicationController
 
   def process_cheque
     delete = params.key? 'delete'
-    if @item
+    amount = params['amount'].to_f || 0
+    if @item && (delete || amount > 0 || !@item.have_weight)
       if delete
         @barcode.transaction do
           batch = Batch.for_user(current_user).where(barcode: @barcode).first
           if batch.locked_amount > 0
-            batch.count += 1
-            batch.locked_amount -= 1
+            if @item.have_weight
+              batch.count += batch.locked_amount
+              batch.locked_amount = 0
+            else
+              batch.count += 1
+              batch.locked_amount -= 1
+            end
             batch.save!
             count = Receipt.for_user(current_user).last_opened.positions.where(batch: batch, item: @item).try(:first).try(:count)
-            if count && count > 1
-              item = Receipt.for_user(current_user).last_opened.positions.where(batch: batch, item: @item).first
-              item.count -= 1
-              item.save!
-            elsif count && count == 1
-              item = Receipt.for_user(current_user).last_opened.positions.where(batch: batch, item: @item).first
-              Receipt.for_user(current_user).last_opened.positions.delete item
+            if count && count > 1 && !@item.have_weight
+              position = Receipt.for_user(current_user).last_opened.positions.where(batch: batch, item: @item).first
+              position.count -= 1
+              position.save!
+            elsif (count && count == 1) || @item.have_weight
+              position = Receipt.for_user(current_user).last_opened.positions.where(batch: batch, item: @item).first
+              Receipt.for_user(current_user).last_opened.positions.delete position
             end
           end
         end
         render json: nil, status: :ok
       else
         batch = Batch.for_user(current_user).where(barcode: @barcode).first rescue nil
-        if batch.count > 0
+        if batch && batch.count > 0
           @barcode.transaction do
-            batch.count -= 1
-            batch.locked_amount += 1
+            if @item.have_weight
+              batch.count -= amount
+              batch.locked_amount += amount
+            else
+              batch.count -= 1
+              batch.locked_amount += 1
+            end
             batch.save!
             if Receipt.for_user(current_user).last_opened.positions.where(batch: batch, item: @item).try(:first)
               position = Receipt.for_user(current_user).last_opened.positions.where(batch: batch, item: @item).first
-              position.count += 1
+              if @item.have_weight
+                position.count += amount
+              else
+                position.count += 1
+              end
               position.save!
             else
-              Receipt.for_user(current_user).last_opened.positions << Position.create(batch: batch, item: @item, count: 1, price: batch.price)
+              if @item.have_weight
+                Receipt.for_user(current_user).last_opened.positions << Position.create(batch: batch, item: @item, count: amount, price: batch.price)
+              else
+                Receipt.for_user(current_user).last_opened.positions << Position.create(batch: batch, item: @item, count: 1, price: batch.price)
+              end
             end
           end
-          render json: @item.slice(:name).merge({price: batch.price, code: @barcode.code})
+          render json: @item.slice(:name).merge({price: batch.price * amount, code: @barcode.code})
         else
           render json: { error: 'insufficient_amount' }, status: :unprocessable_entity
         end
@@ -108,7 +127,10 @@ class ItemsController < ApplicationController
   # POST /items
   # POST /items.json
   def create
-    @item = Item.new(item_params)
+
+    @item = Item.new
+    @item.name = params['name']
+    @item.have_weight = (params['have_weight'] == 'true')
     @item.user = current_user
     @item.company = current_user.company
     if @item.save
@@ -121,7 +143,10 @@ class ItemsController < ApplicationController
   # PATCH/PUT /items/1
   # PATCH/PUT /items/1.json
   def update
-    if @item.update(item_params)
+    puts params['have_weight']
+    @item.name = params['name']
+    @item.have_weight = (params['have_weight'] == 'true')
+    if @item.save
       render json: @item, status: :ok
     else
       render json: @item.errors, status: :unprocessable_entity
@@ -148,6 +173,6 @@ class ItemsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def item_params
-      params.permit(:name)
+      params.permit(:name, :have_weight)
     end
 end

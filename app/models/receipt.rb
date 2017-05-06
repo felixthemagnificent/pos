@@ -20,7 +20,10 @@ class Receipt < ApplicationRecord
 
   def update_total
     total_sum = 0
-    positions.each { |p| total_sum += Batch.for_user(user).where(item: p.item).first.price * p.count }
+    positions.each do |p|
+      temp_sum = Batch.for_user(user).where(item: p.item).first.price * p.count
+      total_sum += p.item.have_weight ? temp_sum / 1000 : temp_sum
+    end
     self.total = total_sum
   end
 

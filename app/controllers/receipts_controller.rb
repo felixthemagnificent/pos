@@ -53,9 +53,10 @@ class ReceiptsController < ApplicationController
     positions = Receipt.for_user(current_user).last_opened.positions.map do |position|
         {
           ItemName: position.item.name,
-          Price: position.batch.price,
+          Price: (position.item.have_weight ? (position.batch.price * position.count / 1000) : (position.batch.price)),
           Barcode: position.batch.barcode.code,
-          Amount: position.count
+          Amount: position.count,
+          have_weight: position.item.have_weight
         }
     end
     render json: positions

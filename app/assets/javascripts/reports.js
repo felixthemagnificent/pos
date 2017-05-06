@@ -1,4 +1,4 @@
-var reportsReadyFunction = function() {
+var reportsReady = function() {
   var receiptDetailsWindow = $("#receipt_detail_window").kendoWindow({
     width: "400px",
     title: "Чек",
@@ -350,12 +350,6 @@ var reportsReadyFunction = function() {
   });
 }
 
-var reportsReady = function () {
-  if (!$('#all_receipts_grid').data('kendoGrid'))
-  {
-    reportsReadyFunction();
-  }
-}
-
-$(reportsReady);
-$( document ).on('turbolinks:load',reportsReady);
+$(function() {
+  if ($().kendoWindow != undefined) { reportsReady(); }
+});

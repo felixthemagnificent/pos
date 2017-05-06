@@ -21,10 +21,11 @@ class BatchesController < ApplicationController
             name: e.item.name,
             item_id: e.item.id,
             batch_count: e.count,
+            have_weight: e.item.have_weight,
             last_added: e.created_at,
             price: e.price,
             supplier_price: e.supplier_price,
-            amount: e.count
+            amount: e.item.have_weight ? (e.count / 1000) : e.count
           } if e.item
         end
         render json: {data:items, total: total }
@@ -102,6 +103,7 @@ class BatchesController < ApplicationController
     @batch.item = Item.find(params[:item_id])
     @batch.company = current_user.company if current_user.company?
     @batch.count = params[:amount].to_i
+    @batch.count *= 1000 if @batch.item.have_weight
     @batch.price = params[:price].to_i
     @batch.supplier_price = params[:supplier_price].to_i
     @batch.barcode = Barcode.find_by_code params[:barcode]
@@ -120,7 +122,8 @@ class BatchesController < ApplicationController
   def update
     @batch.price = params[:price].to_i
     @batch.supplier_price = params[:supplier_price].to_i
-    @batch.count = params[:amount].to_i if current_user.admin?
+    @batch.count = params[:amount].to_i
+    @batch.count *= 1000 if @batch.item.have_weight
     if @batch.save
       render json: nil, status: :ok
     else

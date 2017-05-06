@@ -43,7 +43,10 @@ var itemsReady = function() {
           schema: {
               model: {
                   id: "id",
-                  fields: ["name"]
+                  fields: {
+                  name: { type: "string" },
+                  have_weight: { type: "boolean" }
+                  }
               }
           },
           pageSize: 20,
@@ -85,6 +88,11 @@ var itemsReady = function() {
               title: "Название продукта",
           },
           {
+              field: "have_weight",
+              title: "Весовой продукт",
+              template: '<input type="checkbox" #= have_weight ? "checked=checked" : "" # disabled="disabled" ></input>'
+          },
+          {
             command: [
             {
               text: { // sets the text of the "Edit", "Update" and "Cancel" buttons
@@ -121,5 +129,7 @@ var itemsReady = function() {
   });
 }
 
-$(itemsReady);
-$( document ).on('turbolinks:load',itemsReady);
+$(function() {
+  if ($().kendoWindow != undefined) { itemsReady(); }
+});
+
